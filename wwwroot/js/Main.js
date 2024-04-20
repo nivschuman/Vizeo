@@ -120,6 +120,26 @@ async function next() {
 }
 
 async function join() {
+    userData = await getUserData();
+    let userDataJson = JSON.stringify(userData);
+
+    hubConnection.invoke("Join", userDataJson);
+
+    await disableUserDataInput();
+}
+
+async function start() {
+    if (localStream == undefined) {
+        await setupDevice();
+    }
+
+    await startHubConnection();
+
+    let goButton = document.getElementById("goButton");
+    goButton.onclick = join;
+}
+
+async function getUserData() {
     let nameInput = document.getElementById("myNameInput");
     let name = nameInput.value;
 
@@ -151,20 +171,30 @@ async function join() {
         InterestedIn: interestedIn
     }
 
-    let userDataJson = JSON.stringify(userData);
-
-    hubConnection.invoke("Join", userDataJson);
+    return userData;
 }
 
-async function start() {
-    if (localStream == undefined) {
-        await setupDevice();
-    }
+async function disableUserDataInput() {
+    let nameInput = document.getElementById("myNameInput");
+    nameInput.disabled = true
 
-    await startHubConnection();
+    let maleRadioButton = document.getElementById("maleRadioButton");
+    maleRadioButton.disabled = true;
 
-    let goButton = document.getElementById("goButton");
-    goButton.onclick = join;
+    let countrySelection = document.getElementById("myCountrySelection");
+    countrySelection.disabled = true;
+
+    let ageInput = document.getElementById("myAgeInput");
+    ageInput.disabled = true;
+
+    let sameCountryCheckBox = document.getElementById("sameCountryCheckBox");
+    sameCountryCheckBox.disabled = true;
+
+    let malesCheckbox = document.getElementById("malesCheckBox");
+    malesCheckbox.disabled = true;
+
+    let femalesCheckbox = document.getElementById("femalesCheckBox");
+    femalesCheckbox.disabled = true;
 }
 
 start();
