@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VideoProject.Models;
 
 namespace VideoProject.Hubs
@@ -31,6 +32,76 @@ namespace VideoProject.Hubs
             await dbContext.SaveChangesAsync();
 
             //await Clients.Client(Context.ConnectionId).SendAsync("SendOffer", toConnectionId);
+        }
+
+        public async Task FindMate()
+        {
+            UserModel user = await dbContext.users.FindAsync(Context.ConnectionId);
+
+            //has not joined yet, not in database
+            if(user == null)
+            {
+                return;
+            }
+
+            //no 
+
+            //get interests
+            string[] interests = user.InterestedIn.Split(";");
+            bool sameCountry = bool.Parse(interests[0]);
+            bool male = bool.Parse(interests[1]);
+            bool female = bool.Parse(interests[2]);
+
+            //find match
+            UserModel match = null;
+            if(sameCountry)
+            {
+                if((male && female) || (!male && !female))
+                {
+                    match = dbContext.users.FirstOrDefault(other => other.Country == user.Country && other.Status == 0 && other.ConnectionId != user.ConnectionId);
+                }
+                else if(male && !female)
+                {
+                    match = dbContext.users.FirstOrDefault(other => other.Country == user.Country && other.Gender == "male" && other.Status == 0 && other.ConnectionId != user.ConnectionId);
+                }
+                else if(!male && female)
+                {
+                    match = dbContext.users.FirstOrDefault(other => other.Country == user.Country && other.Gender == "female" && other.Status == 0 && other.ConnectionId != user.ConnectionId);
+                }
+            }
+            else
+            {
+                if((male && female) || (!male && !female))
+                {
+                    match = dbContext.users.FirstOrDefault(other => other.Status == 0 && other.ConnectionId != user.ConnectionId);
+                }
+                else if(male && !female)
+                {
+                    match = dbContext.users.FirstOrDefault(other => other.Gender == "male" && other.Status == 0 && other.ConnectionId != user.ConnectionId);
+                }
+                else if(!male && female)
+                {
+                    match = dbContext.users.FirstOrDefault(other => other.Gender == "female" && other.Status == 0 && other.ConnectionId != user.ConnectionId);
+                }
+            }
+
+            //no match was found
+            if(match == null)
+            {
+                return;
+            }
+
+            //change status of both to connecting
+            user.Status = 1;
+            match.Status = 1;
+            await dbContext.SaveChangesAsync();
+
+            //update peer user data
+            await Clients.Client(user.ConnectionId).SendAsync("PeerData", JsonSerializer.Serialize(match));
+            await Clients.Client(match.ConnectionId).SendAsync("PeerData", JsonSerializer.Serialize(user));
+
+            //connect user and match
+            await Clients.Client(Context.ConnectionId).SendAsync("SendOffer", match.ConnectionId);
         }
 
         public async Task PassOffer(string toConnectionId, string offer)

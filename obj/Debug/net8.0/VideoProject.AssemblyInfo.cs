@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VideoProject")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bb08158f9ba4c47f1b4ff5cd15485aada27dc057")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fbc10b3f774cf6e24356d3c973ab93a69b22fcfb")]
 [assembly: System.Reflection.AssemblyProductAttribute("VideoProject")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VideoProject")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
