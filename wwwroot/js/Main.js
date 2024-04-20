@@ -93,7 +93,7 @@ async function startHubConnection() {
         setTimeout(startHubConnection, 5000);
     }
 
-    hubConnection.invoke("Join");
+    //hubConnection.invoke("Join");
 }
 
 async function disconnectPeer() {
@@ -110,21 +110,61 @@ async function peerDisconnected() {
     if (localPeerConnection.iceConnectionState == "disconnected") {
         await disconnectPeer();
 
-        hubConnection.invoke("Join");
+        //hubConnection.invoke("Join");
     }
 }
 
 async function next() {
     await disconnectPeer();
-    hubConnection.invoke("Join");
+    //hubConnection.invoke("Join");
+}
+
+async function join() {
+    let nameInput = document.getElementById("myNameInput");
+    let name = nameInput.value;
+
+    let maleRadioButton = document.getElementById("maleRadioButton");
+    let gender = maleRadioButton.checked ? "male" : "female";
+
+    let countrySelection = document.getElementById("myCountrySelection");
+    let country = countrySelection.value;
+
+    let ageInput = document.getElementById("myAgeInput");
+    let age = parseInt(ageInput.value);
+
+    let sameCountryCheckBox = document.getElementById("sameCountryCheckBox");
+    let sameCountry = sameCountryCheckBox.checked ? "true" : "false";
+
+    let malesCheckbox = document.getElementById("malesCheckBox");
+    let males = malesCheckbox.checked ? "true" : "false";
+
+    let femalesCheckbox = document.getElementById("femalesCheckBox");
+    let females = femalesCheckbox.checked ? "true" : "false";
+
+    let interestedIn = sameCountry + `${sameCountry};${males};${females}`;
+
+    let userData = {
+        Name: name,
+        Country: country,
+        Age: age,
+        Gender: gender,
+        InterestedIn: interestedIn
+    }
+
+    let userDataJson = JSON.stringify(userData);
+
+    hubConnection.invoke("Join", userDataJson);
 }
 
 async function start() {
     if (localStream == undefined) {
         await setupDevice();
     }
-    
+
     await startHubConnection();
+
+    let goButton = document.getElementById("goButton");
+    goButton.onclick = join;
 }
 
 start();

@@ -1,6 +1,11 @@
+using Microsoft.EntityFrameworkCore;
 using VideoProject.Hubs;
+using VideoProject.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+string connection = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<UserDbContext>(options => options.UseSqlServer(connection));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

@@ -1,23 +1,36 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using System.Text.Json;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using VideoProject.Models;
 
 namespace VideoProject.Hubs
 {
     public class SignalRtcHub : Hub
     {
-        public static Queue<string>? waiting = new Queue<string>();
-        public async Task Join()
+        private UserDbContext dbContext;
+
+        public SignalRtcHub(UserDbContext dbContext) : base()
         {
-            if(waiting.Count == 0)
-            {
-                waiting.Enqueue(Context.ConnectionId);
+            this.dbContext = dbContext;
+        }
 
-                return;
-            }
+        public async Task Join(string userData)
+        {
+            UserData user = JsonSerializer.Deserialize<UserData>(userData);
 
-            string toConnectionId = waiting.Dequeue();
+            UserModel userModel = new UserModel();
+            userModel.ConnectionId = Context.ConnectionId;
+            userModel.Name = user.Name;
+            userModel.Country = user.Country;
+            userModel.Age = user.Age;
+            userModel.Gender = user.Gender;
+            userModel.InterestedIn = user.InterestedIn;
+            userModel.Status = 0;
 
-            await Clients.Client(Context.ConnectionId).SendAsync("SendOffer", toConnectionId);
+            await dbContext.users.AddAsync(userModel);
+            await dbContext.SaveChangesAsync();
+
+            //await Clients.Client(Context.ConnectionId).SendAsync("SendOffer", toConnectionId);
         }
 
         public async Task PassOffer(string toConnectionId, string offer)
