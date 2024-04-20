@@ -27,3 +27,4 @@ C:\Users\nivsc\source\repos\VideoProject\VideoProject\obj\Debug\net8.0\VideoProj
 C:\Users\nivsc\source\repos\VideoProject\VideoProject\obj\Debug\net8.0\VideoProject.genruntimeconfig.cache
 C:\Users\nivsc\source\repos\VideoProject\VideoProject\obj\Debug\net8.0\ref\VideoProject.dll
 C:\Users\nivsc\source\repos\VideoProject\VideoProject\bin\Debug\net8.0\libman.json
+C:\Users\nivsc\source\repos\VideoProject\VideoProject\obj\Debug\net8.0\VideoProject.sourcelink.json
