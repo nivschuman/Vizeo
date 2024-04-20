@@ -15,9 +15,10 @@ let localPeerConnection;
 let hubConnection = new signalR.HubConnectionBuilder().withUrl("/Signals").build();
 let toConnectionId;
 
-hubConnection.on("SendOffer", doOffer)
-hubConnection.on("SendAnswer", doAnswer)
-hubConnection.on("HandleAnswer", gotRemoteDescription)
+hubConnection.on("SendOffer", doOffer);
+hubConnection.on("SendAnswer", doAnswer);
+hubConnection.on("HandleAnswer", gotRemoteDescription);
+hubConnection.on("PeerData", updatePeerUserData);
 
 async function setupDevice() {
     let stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
@@ -126,6 +127,8 @@ async function join() {
     hubConnection.invoke("Join", userDataJson);
 
     await disableUserDataInput();
+
+    hubConnection.invoke("FindMate");
 }
 
 async function start() {
@@ -195,6 +198,25 @@ async function disableUserDataInput() {
 
     let femalesCheckbox = document.getElementById("femalesCheckBox");
     femalesCheckbox.disabled = true;
+}
+
+async function updatePeerUserData(peerModelJson)
+{
+    let peerModel = JSON.parse(peerModelJson);
+
+    console.log(peerModel);
+
+    let peerName = document.getElementById("peerName");
+    peerName.textContent = peerModel.Name;
+
+    let peerGender = document.getElementById("peerGender");
+    peerGender.textContent = peerModel.Gender;
+
+    let peerCountry = document.getElementById("peerCountry");
+    peerCountry.textContent = peerModel.Country;
+
+    let peerAge = document.getElementById("peerAge");
+    peerAge.textContent = peerModel.Age.toString();
 }
 
 start();
