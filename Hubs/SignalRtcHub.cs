@@ -42,5 +42,19 @@ namespace VideoProject.Hubs
         {
             await Clients.Client(toConnectionId).SendAsync("HandleAnswer", Context.ConnectionId, answer);
         }
+
+        public override async Task OnDisconnectedAsync(Exception exception)
+        {
+            UserModel user = await dbContext.users.FindAsync(Context.ConnectionId);
+
+            if(user != null)
+            {
+                dbContext.Remove(user);
+            }
+
+            await dbContext.SaveChangesAsync();
+
+            await base.OnDisconnectedAsync(exception);
+        }
     }
 }

@@ -141,7 +141,7 @@ async function join() {
     let femalesCheckbox = document.getElementById("femalesCheckBox");
     let females = femalesCheckbox.checked ? "true" : "false";
 
-    let interestedIn = sameCountry + `${sameCountry};${males};${females}`;
+    let interestedIn = `${sameCountry};${males};${females}`;
 
     let userData = {
         Name: name,
