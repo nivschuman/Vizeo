@@ -70,6 +70,11 @@
                 margin-bottom: 5px;
             }
 
+            .radio-label {
+                display: block;
+                margin-bottom: 5px;
+            }
+
             button {
                 padding: 10px 20px;
                 margin-top: 10px;
@@ -88,67 +93,81 @@
     </head>
     <body>
         <div class="container">
-        <div class="column">
-            <div class="video-wrapper">
-                <video autoplay id="my-video"></video>
+            <div class="column">
+                <div class="video-wrapper">
+                    <video autoplay id="my-video"></video>
+                </div>
+                <div class="info-container">
+                    <div class="info-item">
+                        <span class="info-label">My name:</span>
+                        <input type="text" id="myNameInput" class="info-input" placeholder="Enter name">
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">My gender:</span>
+                        <label class="radio-label">
+                            <input type="radio" name="gender" value="male">
+                            Male
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="gender" value="female">
+                            Female
+                        </label>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">I live in:</span>
+                        <input type="text" id="myCountryInput" class="info-input" placeholder="Enter country">
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">My age:</span>
+                        <input type="text" id="myAgeInput" class="info-input" placeholder="Enter age">
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">I am interested in:</span>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="sameCountryCheckbox">
+                            Same country
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="boysCheckbox">
+                            Boys
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="girlsCheckbox">
+                            Girls
+                        </label>
+                    </div>
+                    <div class="info-item">
+                        <button type="button" class="btn btn-success" id="goButton">Go!</button>
+                        <button type="button" class="btn btn-danger" id="stopButton">Stop!</button>
+                    </div>
+                    <!-- Additional info fields for Me can go here -->
+                </div>
             </div>
-            <div class="info-container">
-                 <div class="info-item">
-                    <span class="info-label">My name:</span>
-                    <input type="text" id="myNameInput" class="info-input" placeholder="Enter name">
+            <div class="column">
+                <div class="video-wrapper">
+                    <video autoplay id="peer-video"></video>
                 </div>
-                <div class="info-item">
-                    <span class="info-label">I live in:</span>
-                    <input type="text" id="myCountryInput" class="info-input" placeholder="Enter country">
+                <div class="info-container">
+                    <div class="info-item">
+                        <span class="info-label">Name:</span> <span id="peerName">Name</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Gender:</span> <span id="peerGender">Gender</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Living in:</span> <span id="peerCountry">Country</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Age:</span> <span id="peerAge">Age</span>
+                    </div>
+                    <div class="info-item">
+                        <button type="button" class="btn btn-warning" id="reportButton">Report</button>
+                        <button type="button" class="btn btn-info" id="likeButton">Like</button>
+                    </div>
+                    <!-- Additional info fields for Peer can go here -->
                 </div>
-                <div class="info-item">
-                    <span class="info-label">My age:</span>
-                    <input type="text" id="myAgeInput" class="info-input" placeholder="Enter age">
-                </div>
-                <div class="info-item">
-                    <span class="info-label">I am interested in:</span>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="sameCountryCheckbox">
-                        Same country
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="boysCheckbox">
-                        Boys
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="girlsCheckbox">
-                        Girls
-                    </label>
-                </div>
-                <div class="info-item">
-                    <button type="button" class="btn btn-success" id="goButton">Go!</button>
-                    <button type="button" class="btn btn-danger" id="stopButton">Stop!</button>
-                </div>
-                <!-- Additional info fields for Person 1 can go here -->
             </div>
         </div>
-        <div class="column">
-            <div class="video-wrapper">
-                <video autoplay id="peer-video"></video>
-            </div>
-            <div class="info-container">
-                <div class="info-item">
-                    <span class="info-label">Name:</span> <span id="name2">Name</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Living in:</span> <span id="country2">Country</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Age:</span> <span id="age2">Age</span>
-                </div>
-                <div class="info-item">
-                    <button type="button" class="btn btn-warning" id="reportButton">Report</button>
-                    <button type="button" class="btn btn-info" id="likeButton">Like</button>
-                </div>
-                <!-- Additional info fields for Person 2 can go here -->
-            </div>
-        </div>
-    </div>
    </body>
 </html>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css" rel="stylesheet">
