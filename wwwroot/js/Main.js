@@ -93,8 +93,6 @@ async function startHubConnection() {
         console.log(err);
         setTimeout(startHubConnection, 5000);
     }
-
-    //hubConnection.invoke("Join");
 }
 
 async function disconnectPeer() {
@@ -111,13 +109,13 @@ async function peerDisconnected() {
     if (localPeerConnection.iceConnectionState == "disconnected") {
         await disconnectPeer();
 
-        //hubConnection.invoke("Join");
+        hubConnection.invoke("FindMate");
     }
 }
 
 async function next() {
     await disconnectPeer();
-    //hubConnection.invoke("Join");
+    hubConnection.invoke("FindMate");
 }
 
 async function join() {
@@ -127,6 +125,8 @@ async function join() {
     hubConnection.invoke("Join", userDataJson);
 
     await disableUserDataInput();
+    let peerColumn = document.getElementById("peer-column");
+    peerColumn.hidden = false;
 
     hubConnection.invoke("FindMate");
 }
@@ -140,6 +140,9 @@ async function start() {
 
     let goButton = document.getElementById("goButton");
     goButton.onclick = join;
+
+    let nextButton = document.getElementById("nextButton");
+    nextButton.onclick = next;
 }
 
 async function getUserData() {
@@ -198,6 +201,9 @@ async function disableUserDataInput() {
 
     let femalesCheckbox = document.getElementById("femalesCheckBox");
     femalesCheckbox.disabled = true;
+
+    let goButton = document.getElementById("goButton");
+    goButton.disabled = true;
 }
 
 async function updatePeerUserData(peerModelJson)

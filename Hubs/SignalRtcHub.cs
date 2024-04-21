@@ -44,7 +44,9 @@ namespace VideoProject.Hubs
                 return;
             }
 
-            //no 
+            //set user status to 0
+            user.Status = 0;
+            await dbContext.SaveChangesAsync();
 
             //get interests
             string[] interests = user.InterestedIn.Split(";");
@@ -114,7 +116,7 @@ namespace VideoProject.Hubs
             await Clients.Client(toConnectionId).SendAsync("HandleAnswer", Context.ConnectionId, answer);
         }
 
-        public override async Task OnDisconnectedAsync(Exception exception)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
             UserModel user = await dbContext.users.FindAsync(Context.ConnectionId);
 
