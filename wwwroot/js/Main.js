@@ -62,6 +62,9 @@ async function createPeerConnection() {
 
     //onicecandidate event, send out ice candidates
     peerConnection.onicecandidate = doCandidate;
+
+    //onconnectionstatechange event
+    peerConnection.onconnectionstatechange = connectionStateChanged;
 }
 
 async function doOffer(tcId) {
@@ -132,6 +135,9 @@ async function startHubConnection() {
 }
 
 async function disconnectPeer() {
+    let peerColumn = document.getElementById("peer-column");
+    peerColumn.hidden = true;
+
     peerConnection.ontrack = null;
     peerConnection.onremovetrack = null;
     peerConnection.onicecandidate = null;
@@ -141,7 +147,7 @@ async function disconnectPeer() {
     await peerConnection.close();
 }
 
-async function peerDisconnected() {
+async function connectionStateChanged() {
     if (peerConnection.iceConnectionState == "disconnected") {
         await disconnectPeer();
 
@@ -161,8 +167,6 @@ async function join() {
     hubConnection.invoke("Join", userDataJson);
 
     await disableUserDataInput();
-    let peerColumn = document.getElementById("peer-column");
-    peerColumn.hidden = false;
 
     hubConnection.invoke("FindMate");
 }
@@ -259,6 +263,9 @@ async function updatePeerUserData(peerModelJson)
 
     let peerAge = document.getElementById("peerAge");
     peerAge.textContent = peerModel.Age.toString();
+
+    let peerColumn = document.getElementById("peer-column");
+    peerColumn.hidden = false;
 }
 
 start();
