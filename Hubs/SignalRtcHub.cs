@@ -30,8 +30,6 @@ namespace VideoProject.Hubs
 
             await dbContext.users.AddAsync(userModel);
             await dbContext.SaveChangesAsync();
-
-            //await Clients.Client(Context.ConnectionId).SendAsync("SendOffer", toConnectionId);
         }
 
         public async Task FindMate()
@@ -108,12 +106,20 @@ namespace VideoProject.Hubs
 
         public async Task PassOffer(string toConnectionId, string offer)
         {
+            //TBD check if accidently trying to send offer to already connected user
             await Clients.Client(toConnectionId).SendAsync("SendAnswer", Context.ConnectionId, offer);
         }
 
         public async Task PassAnswer(string toConnectionId, string answer)
         {
             await Clients.Client(toConnectionId).SendAsync("HandleAnswer", Context.ConnectionId, answer);
+
+            //TBD change status of both to 2, update peer data here
+        }
+
+        public async Task PassCandidate(string toConnectionId, string candidate)
+        {
+            await Clients.Client(toConnectionId).SendAsync("HandleCandidate", Context.ConnectionId, candidate);
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
