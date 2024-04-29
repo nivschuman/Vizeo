@@ -2,22 +2,37 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your JavaScript code.
+
+/*
 const servers = [];
 const pcConstraints = {
     'optional': [
         { 'DtlsSrtpKeyAgreement': true },
     ],
 };
+*/
+
+//TBD setup stun and turn servers
+const iceServers = [
+    //google stun servers
+    { 'urls': ['stun:74.125.142.127:19302', 'stun:172.217.192.127:19302'] }
+];
+
+const configuration = {
+    'iceServers': iceServers
+};
 
 let localStream;
-let localPeerConnection;
+let remoteStream;
+let peerConnection;
 
 let hubConnection = new signalR.HubConnectionBuilder().withUrl("/Signals").build();
 let toConnectionId;
 
 hubConnection.on("SendOffer", doOffer);
 hubConnection.on("SendAnswer", doAnswer);
-hubConnection.on("HandleAnswer", gotRemoteDescription);
+hubConnection.on("HandleAnswer", addAnswer);
+hubConnection.on("HandleCandidate", addCandidate);
 hubConnection.on("PeerData", updatePeerUserData);
 
 async function setupDevice() {
@@ -29,61 +44,82 @@ async function setupDevice() {
     localStream = stream;
 }
 
+async function createPeerConnection() {
+    peerConnection = new RTCPeerConnection(configuration);
+
+    //remote stream
+    remoteStream = new MediaStream();
+    let peer_video = document.getElementById("peer-video");
+    peer_video.srcObject = remoteStream;
+
+    //local stream tracks
+    localStream.getTracks().forEach(track => {
+        peerConnection.addTrack(track, localStream);
+    });
+
+    //ontrack event
+    peerConnection.ontrack = gotRemoteTrack;
+
+    //onicecandidate event, send out ice candidates
+    peerConnection.onicecandidate = doCandidate;
+}
+
 async function doOffer(tcId) {
     toConnectionId = tcId;
-    localPeerConnection = new RTCPeerConnection(servers, pcConstraints);
-    localPeerConnection.onicecandidate = gotLocalIceCandidateOffer;
-    localPeerConnection.onaddstream = gotRemoteStream;
-    localPeerConnection.oniceconnectionstatechange = peerDisconnected;
-    localPeerConnection.addStream(localStream);
-    localPeerConnection.createOffer().then(gotLocalDescription);
+    await createPeerConnection();
+
+    //doing offer
+    let offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+
+    hubConnection.invoke("PassOffer", toConnectionId, JSON.stringify(offer));
 }
 
 async function doAnswer(tcId, offer) {
+    toConnectionId = tcId;
+    await createPeerConnection();
+
+    //set remote description
     offer = JSON.parse(offer);
-    toConnectionId = tcId;
-    localPeerConnection = new RTCPeerConnection(servers, pcConstraints);
-    localPeerConnection.onicecandidate = gotLocalIceCandidateAnswer;
-    localPeerConnection.onaddstream = gotRemoteStream;
-    localPeerConnection.oniceconnectionstatechange = peerDisconnected;
-    localPeerConnection.addStream(localStream);
-    localPeerConnection.setRemoteDescription(offer);
-    localPeerConnection.createAnswer().then(gotAnswerDescription);
+    await peerConnection.setRemoteDescription(offer);
+
+    //doing answer
+    let answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+
+    hubConnection.invoke("PassAnswer", toConnectionId, JSON.stringify(answer));
 }
 
-async function gotLocalIceCandidateOffer(event) {
-    if (!event.candidate) {
-        const offer = localPeerConnection.localDescription;
-        //send offer sdp to signaling server
-        hubConnection.invoke("PassOffer", toConnectionId, JSON.stringify(offer));
+async function doCandidate(event) {
+    if(event.candidate) {
+        hubConnection.invoke("PassCandidate", toConnectionId, JSON.stringify(event.candidate));
     }
 }
 
-async function gotLocalIceCandidateAnswer(event) {
-    if (!event.candidate) {
-        const answer = localPeerConnection.localDescription;
-        //send answer sdp to signaling server
-        hubConnection.invoke("PassAnswer", toConnectionId, JSON.stringify(answer));
-    }
+async function gotRemoteTrack(event) {
+    console.log("got remote stream");
+    console.log(event.streams);
+    event.streams[0].getTracks().forEach(track => {
+        remoteStream.addTrack(track); 
+    });
 }
 
-async function gotRemoteStream(event) {
-    let peer_video = document.getElementById("peer-video");
-    peer_video.srcObject = event.stream;
-}
-
-async function gotLocalDescription(offer) {
-    localPeerConnection.setLocalDescription(offer);
-}
-
-async function gotAnswerDescription(answer) {
-    localPeerConnection.setLocalDescription(answer);
-}
-
-async function gotRemoteDescription(tcId, answer) {
+async function addAnswer(tcId, answer) {
+    toConnectionId = tcId
     answer = JSON.parse(answer);
+
+    if(!peerConnection.currentRemoteDescription) {
+        peerConnection.setRemoteDescription(answer);
+    }
+}
+
+async function addCandidate(tcId, candidate) {
     toConnectionId = tcId;
-    localPeerConnection.setRemoteDescription(answer);
+    candidate = JSON.parse(candidate);
+
+    if(peerConnection) {
+        peerConnection.addIceCandidate(candidate)
+    }
 }
 
 async function startHubConnection() {
@@ -96,17 +132,17 @@ async function startHubConnection() {
 }
 
 async function disconnectPeer() {
-    localPeerConnection.ontrack = null;
-    localPeerConnection.onremovetrack = null;
-    localPeerConnection.onicecandidate = null;
-    localPeerConnection.oniceconnectionsstatechange = null;
-    localPeerConnection.onsignalingstatechange = null;
+    peerConnection.ontrack = null;
+    peerConnection.onremovetrack = null;
+    peerConnection.onicecandidate = null;
+    peerConnection.oniceconnectionsstatechange = null;
+    peerConnection.onsignalingstatechange = null;
 
-    await localPeerConnection.close();
+    await peerConnection.close();
 }
 
 async function peerDisconnected() {
-    if (localPeerConnection.iceConnectionState == "disconnected") {
+    if (peerConnection.iceConnectionState == "disconnected") {
         await disconnectPeer();
 
         hubConnection.invoke("FindMate");
