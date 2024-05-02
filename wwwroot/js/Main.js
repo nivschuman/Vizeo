@@ -47,9 +47,13 @@ async function setupDevice() {
 async function createPeerConnection() {
     peerConnection = new RTCPeerConnection(configuration);
 
+    //disable loading screen
+    await disableLoadingScreen();
+
     //remote stream
     remoteStream = new MediaStream();
     let peer_video = document.getElementById("peer-video");
+    peer_video.src = "";
     peer_video.srcObject = remoteStream;
 
     //local stream tracks
@@ -135,9 +139,6 @@ async function startHubConnection() {
 }
 
 async function disconnectPeer() {
-    let peerColumn = document.getElementById("peer-column");
-    peerColumn.hidden = true;
-
     peerConnection.ontrack = null;
     peerConnection.onremovetrack = null;
     peerConnection.onicecandidate = null;
@@ -145,6 +146,8 @@ async function disconnectPeer() {
     peerConnection.onsignalingstatechange = null;
 
     await peerConnection.close();
+
+    await enableLoadingScreen();
 }
 
 async function connectionStateChanged() {
@@ -166,7 +169,11 @@ async function join() {
 
     hubConnection.invoke("Join", userDataJson);
 
+    let peerColumn = document.getElementById("peer-column");
+    peerColumn.hidden = false;
+
     await disableUserDataInput();
+    await enableLoadingScreen();
 
     hubConnection.invoke("FindMate");
 }
@@ -266,6 +273,32 @@ async function updatePeerUserData(peerModelJson)
 
     let peerColumn = document.getElementById("peer-column");
     peerColumn.hidden = false;
+}
+
+async function enableLoadingScreen() {
+    //add loading screen video
+    let peer_video = document.getElementById("peer-video");
+    peer_video.src = "/media/LoadingScreen.mp4";
+    peer_video.srcObject = null;
+    peer_video.loop = true;
+    peer_video.muted = true;
+    peer_video.play();
+
+    //hide peer data
+    let peer_info = document.getElementById("peer-info-container");
+    peer_info.hidden = true;
+}
+
+async function disableLoadingScreen() {
+    //remove loading screen video
+    let peer_video = document.getElementById("peer-video");
+    peer_video.src = "";
+    peer_video.muted = false;
+    peer_video.loop = false;
+
+    //show peer data
+    let peer_info = document.getElementById("peer-info-container");
+    peer_info.hidden = false;
 }
 
 start();
