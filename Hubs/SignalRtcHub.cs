@@ -44,7 +44,7 @@ namespace VideoProject.Hubs
                 return;
             }
 
-            //set user status to 0
+            //set user status to 0, waiting status
             user.Status = 0;
             await dbContext.SaveChangesAsync();
 
@@ -93,7 +93,7 @@ namespace VideoProject.Hubs
                 return;
             }
 
-            //change status of both to connecting
+            //change status of both to 1, connecting status
             user.Status = 1;
             match.Status = 1;
             await dbContext.SaveChangesAsync();
@@ -148,6 +148,21 @@ namespace VideoProject.Hubs
             List<UserModel> chattingList = await dbContext.users.Where(user => user.Status == 1).ToListAsync();
 
             await Clients.Client(Context.ConnectionId).SendAsync("UpdateCounts", malesList.Count, femalesList.Count, chattingList.Count);
+        }
+
+        public async Task StopSearching()
+        {
+            UserModel user = await dbContext.users.FindAsync(Context.ConnectionId);
+
+            //user doesn't exist or is connected to other user (cannot stop mid connection, must disconnect first)
+            if(user == null || user.Status == 1)
+            {
+                return;
+            }
+
+            //set user status to 2, stopped status
+            user.Status = 2;
+            await dbContext.SaveChangesAsync();
         }
 
         private async Task UpdateCountsAll()
