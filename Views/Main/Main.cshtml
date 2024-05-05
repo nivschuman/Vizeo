@@ -105,6 +105,21 @@
             button:hover {
                 background-color: #0056b3;
             }
+
+            .count-row {
+                display: flex;
+                justify-content: space-around;
+                margin-top: 20px;
+            }
+
+            .count-item {
+                padding: 10px;
+                margin: 10px;
+                background-color: #007bff;
+                color: #fff;
+                border-radius: 4px;
+            }
+
         </style>
     </head>
     <body>
@@ -400,6 +415,13 @@
                     <div class="info-item">
                         <button type="button" class="btn btn-success" id="goButton">Go!</button>
                         <button type="button" class="btn btn-danger" id="stopButton">Stop!</button>
+                    </div>
+                    <div class="info-item">
+                        <div class="count-row">
+                            <div class="count-item" id="maleCount">Males: 0</div>
+                            <div class="count-item" id="femaleCount">Females: 0</div>
+                            <div class="count-item" id="chattingCount">Chatting: 0</div>
+                        </div>
                     </div>
                     <!-- Additional info fields for Me can go here -->
                 </div>
