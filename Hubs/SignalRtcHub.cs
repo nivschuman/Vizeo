@@ -30,6 +30,8 @@ namespace VideoProject.Hubs
 
             await dbContext.users.AddAsync(userModel);
             await dbContext.SaveChangesAsync();
+
+            await UpdateCountsAll();
         }
 
         public async Task FindMate()
@@ -102,6 +104,9 @@ namespace VideoProject.Hubs
 
             //connect user and match
             await Clients.Client(Context.ConnectionId).SendAsync("SendOffer", match.ConnectionId);
+
+            //number of users chatting has changed, update counts
+            await UpdateCountsAll();
         }
 
         public async Task PassOffer(string toConnectionId, string offer)
@@ -113,8 +118,6 @@ namespace VideoProject.Hubs
         public async Task PassAnswer(string toConnectionId, string answer)
         {
             await Clients.Client(toConnectionId).SendAsync("HandleAnswer", Context.ConnectionId, answer);
-
-            //TBD change status of both to 2, update peer data here
         }
 
         public async Task PassCandidate(string toConnectionId, string candidate)
@@ -133,7 +136,27 @@ namespace VideoProject.Hubs
 
             await dbContext.SaveChangesAsync();
 
+            await UpdateCountsAll();
+
             await base.OnDisconnectedAsync(exception);
+        }
+
+        public async Task UpdateCountsClient()
+        {
+            List<UserModel> malesList = await dbContext.users.Where(user => user.Gender == "male").ToListAsync();
+            List<UserModel> femalesList = await dbContext.users.Where(user => user.Gender == "female").ToListAsync();
+            List<UserModel> chattingList = await dbContext.users.Where(user => user.Status == 1).ToListAsync();
+
+            await Clients.Client(Context.ConnectionId).SendAsync("UpdateCounts", malesList.Count, femalesList.Count, chattingList.Count);
+        }
+
+        private async Task UpdateCountsAll()
+        {
+            List<UserModel> malesList = await dbContext.users.Where(user => user.Gender == "male").ToListAsync();
+            List<UserModel> femalesList = await dbContext.users.Where(user => user.Gender == "female").ToListAsync();
+            List<UserModel> chattingList = await dbContext.users.Where(user => user.Status == 1).ToListAsync();
+
+            await Clients.All.SendAsync("UpdateCounts", malesList.Count, femalesList.Count, chattingList.Count);
         }
     }
 }

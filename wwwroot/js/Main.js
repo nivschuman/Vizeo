@@ -34,6 +34,7 @@ hubConnection.on("SendAnswer", doAnswer);
 hubConnection.on("HandleAnswer", addAnswer);
 hubConnection.on("HandleCandidate", addCandidate);
 hubConnection.on("PeerData", updatePeerUserData);
+hubConnection.on("UpdateCounts", updateCounts);
 
 async function setupDevice() {
     let stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
@@ -190,6 +191,8 @@ async function start() {
 
     let nextButton = document.getElementById("nextButton");
     nextButton.onclick = next;
+
+    await hubConnection.invoke("UpdateCountsClient");
 }
 
 async function getUserData() {
@@ -299,6 +302,16 @@ async function disableLoadingScreen() {
     //show peer data
     let peer_info = document.getElementById("peer-info-container");
     peer_info.hidden = false;
+}
+
+async function updateCounts(males, females, chatting) {
+    let maleCount = document.getElementById("maleCount");
+    let femaleCount = document.getElementById("femaleCount");
+    let chattingCount = document.getElementById("chattingCount");
+
+    maleCount.innerText = `Males: ${males}`;
+    femaleCount.innerText = `Females: ${females}`;
+    chattingCount.innerText = `Chatting: ${chatting}`;
 }
 
 start();
