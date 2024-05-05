@@ -140,13 +140,15 @@ async function startHubConnection() {
 }
 
 async function disconnectPeer() {
-    peerConnection.ontrack = null;
-    peerConnection.onremovetrack = null;
-    peerConnection.onicecandidate = null;
-    peerConnection.oniceconnectionsstatechange = null;
-    peerConnection.onsignalingstatechange = null;
-
-    await peerConnection.close();
+    if(peerConnection) {
+        peerConnection.ontrack = null;
+        peerConnection.onremovetrack = null;
+        peerConnection.onicecandidate = null;
+        peerConnection.oniceconnectionsstatechange = null;
+        peerConnection.onsignalingstatechange = null;
+    
+        await peerConnection.close();
+    }
 
     await enableLoadingScreen();
 }
@@ -173,10 +175,37 @@ async function join() {
     let peerColumn = document.getElementById("peer-column");
     peerColumn.hidden = false;
 
+    let goButton = document.getElementById("goButton");
+    goButton.onclick = go;
+
     await disableUserDataInput();
     await enableLoadingScreen();
 
     hubConnection.invoke("FindMate");
+}
+
+async function go() {
+    let goButton = document.getElementById("goButton");
+    goButton.disabled = true;
+
+    let peerColumn = document.getElementById("peer-column");
+    peerColumn.hidden = false;
+
+    hubConnection.invoke("FindMate");
+}
+
+async function stop() {
+    if(peerConnection) {
+        await disconnectPeer();
+    }
+
+    hubConnection.invoke("StopSearching");
+
+    let peerColumn = document.getElementById("peer-column");
+    peerColumn.hidden = true;
+
+    let goButton = document.getElementById("goButton");
+    goButton.disabled = false;
 }
 
 async function start() {
@@ -191,6 +220,9 @@ async function start() {
 
     let nextButton = document.getElementById("nextButton");
     nextButton.onclick = next;
+
+    let stopButton = document.getElementById("stopButton");
+    stopButton.onclick = stop;
 
     await hubConnection.invoke("UpdateCountsClient");
 }
