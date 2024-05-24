@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "826VWBaDUrpcWvl5RyXnkRi6fPLuM1ugY1r5dCzMKGY=",
+  "Hash": "Nd4R0/Ptxdiv2n5sc/ofyaPgIPPlf24rAo0LGjzeM8k=",
   "Source": "VideoProject",
   "BasePath": "_content/VideoProject",
   "Mode": "Default",
@@ -1155,6 +1155,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\lib\\jquery\\LICENSE.txt"
+    },
+    {
+      "Identity": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\media\\BG.png",
+      "SourceId": "VideoProject",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\",
+      "BasePath": "_content/VideoProject",
+      "RelativePath": "media/BG.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\media\\BG.png"
     },
     {
       "Identity": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\media\\LoadingScreen.mp4",
