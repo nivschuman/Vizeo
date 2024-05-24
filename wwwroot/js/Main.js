@@ -172,7 +172,7 @@ async function join() {
 
     hubConnection.invoke("Join", userDataJson);
 
-    let peerColumn = document.getElementById("peer-column");
+    let peerColumn = document.getElementById("peer-column-content");
     peerColumn.hidden = false;
 
     let goButton = document.getElementById("goButton");
@@ -188,7 +188,7 @@ async function go() {
     let goButton = document.getElementById("goButton");
     goButton.disabled = true;
 
-    let peerColumn = document.getElementById("peer-column");
+    let peerColumn = document.getElementById("peer-column-content");
     peerColumn.hidden = false;
 
     hubConnection.invoke("FindMate");
@@ -201,7 +201,7 @@ async function stop() {
 
     hubConnection.invoke("StopSearching");
 
-    let peerColumn = document.getElementById("peer-column");
+    let peerColumn = document.getElementById("peer-column-content");
     peerColumn.hidden = true;
 
     let goButton = document.getElementById("goButton");
@@ -306,7 +306,7 @@ async function updatePeerUserData(peerModelJson)
     let peerAge = document.getElementById("peerAge");
     peerAge.textContent = peerModel.Age.toString();
 
-    let peerColumn = document.getElementById("peer-column");
+    let peerColumn = document.getElementById("peer-column-content");
     peerColumn.hidden = false;
 }
 
