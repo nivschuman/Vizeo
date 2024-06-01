@@ -170,6 +170,10 @@ async function join() {
     userData = await getUserData();
     let userDataJson = JSON.stringify(userData);
 
+    if(userData == null) {
+        return;
+    }
+
     hubConnection.invoke("Join", userDataJson);
 
     let peerColumn = document.getElementById("peer-column-content");
@@ -178,15 +182,30 @@ async function join() {
     let goButton = document.getElementById("goButton");
     goButton.onclick = go;
 
-    await disableUserDataInput();
+    let nextButton = document.getElementById("nextButton");
+    nextButton.disabled = false;
+
+    let stopButton = document.getElementById("stopButton");
+    stopButton.disabled = false;
+
+    await disableUserDataInput(); //also disables go button
     await enableLoadingScreen();
 
     hubConnection.invoke("FindMate");
 }
 
 async function go() {
+    //disable go button
     let goButton = document.getElementById("goButton");
     goButton.disabled = true;
+
+    //enable next button
+    let nextButton = document.getElementById("nextButton");
+    nextButton.disabled = false;
+
+    //enable stop button
+    let stopButton = document.getElementById("stopButton");
+    stopButton.disabled = false;
 
     let peerColumn = document.getElementById("peer-column-content");
     peerColumn.hidden = false;
@@ -204,8 +223,17 @@ async function stop() {
     let peerColumn = document.getElementById("peer-column-content");
     peerColumn.hidden = true;
 
+    //enable go button
     let goButton = document.getElementById("goButton");
     goButton.disabled = false;
+
+    //disable next button
+    let nextButton = document.getElementById("nextButton");
+    nextButton.disabled = true;
+
+    //disable stop button
+    let stopButton = document.getElementById("stopButton");
+    stopButton.disabled = true;
 }
 
 async function start() {
@@ -231,6 +259,11 @@ async function getUserData() {
     let nameInput = document.getElementById("myNameInput");
     let name = nameInput.value;
 
+    if(name == "") {
+        alert("You need to enter a name!");
+        return null;
+    }
+
     let maleRadioButton = document.getElementById("maleRadioButton");
     let gender = maleRadioButton.checked ? "male" : "female";
 
@@ -240,6 +273,11 @@ async function getUserData() {
     let ageInput = document.getElementById("myAgeInput");
     let age = parseInt(ageInput.value);
 
+    if(isNaN(age) || (age < 18 || age > 120)) {
+        alert("Age must be bewteen 18 and 120!");
+        return null;
+    }
+
     let sameCountryCheckBox = document.getElementById("sameCountryCheckBox");
     let sameCountry = sameCountryCheckBox.checked ? "true" : "false";
 
@@ -248,6 +286,11 @@ async function getUserData() {
 
     let femalesCheckbox = document.getElementById("femalesCheckBox");
     let females = femalesCheckbox.checked ? "true" : "false";
+
+    if(males == "false" && females == "false") {
+        alert("You must choose male or female or both!");
+        return null;
+    }
 
     let interestedIn = `${sameCountry};${males};${females}`;
 
