@@ -34,9 +34,9 @@
 
                         <div class="row mt-3">
                             <div class="col-md-3">
-                                <label for="maleRadioButton" class="col-form-label">Gender:</label>
+                                <label for="genderRadioButtonsDiv" class="col-form-label">Gender:</label>
                             </div>
-                            <div class="col-md-9">
+                            <div class="col-md-9 d-flex align-items-center" id="genderRadioButtonsDiv">
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="radio" id="maleRadioButton" name="gender" value="male" checked="checked">
                                     <label class="form-check-label" for="maleRadioButton">Male</label>
@@ -312,15 +312,25 @@
                         </div>
 
                         <div class="row mt-3">
-                            <div class="col-md-3">
-                                <label for="sameCountryCheckBox" class="col-form-label">Find me:</label>
+                            <div class="col-md-3 d-flex">
+                                <label for="sameCountryCheckBox" class="col-form-label"></label>
                             </div>
                             <div class="col-md-9">
-                                <input type="checkbox" id="sameCountryCheckBox">My Country
-                                <input type="checkbox" id="malesCheckBox">Males                                                  
-                                <input type="checkbox" id="femalesCheckBox">Females
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="sameCountryCheckBox">
+                                    <label class="form-check-label" for="sameCountryCheckBox">From Same Country</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="malesCheckBox">
+                                    <label class="form-check-label" for="malesCheckBox">Find Males</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="femalesCheckBox">
+                                    <label class="form-check-label" for="femalesCheckBox">Find Females</label>
+                                </div>
                             </div>
                         </div>
+
                         <!-- Additional info fields for Me can go here -->
                     </div>
                 </div>
@@ -362,8 +372,11 @@
             </div>
         </div>
         
-        <footer>
-            <p>Copyright &copy; 2024 "Niv Schuman". All rights reserved.</p>
+
+        <footer class="bg-body-tertiary text-center text-lg-start">
+            <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
+                Copyright &copy; 2024 "Niv Schuman". All rights reserved.
+            </div>
         </footer>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js"></script>
