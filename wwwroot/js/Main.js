@@ -35,6 +35,7 @@ hubConnection.on("HandleAnswer", addAnswer);
 hubConnection.on("HandleCandidate", addCandidate);
 hubConnection.on("PeerData", updatePeerUserData);
 hubConnection.on("UpdateCounts", updateCounts);
+hubConnection.on("PeerDisconnected", peerDisconnected);
 
 async function setupDevice() {
     let stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
@@ -146,6 +147,8 @@ async function disconnectPeer() {
         peerConnection.onicecandidate = null;
         peerConnection.oniceconnectionsstatechange = null;
         peerConnection.onsignalingstatechange = null;
+
+        toConnectionId = null;
     
         await peerConnection.close();
     }
@@ -154,16 +157,24 @@ async function disconnectPeer() {
 }
 
 async function connectionStateChanged() {
+    /*
     if (peerConnection.iceConnectionState == "disconnected") {
         await disconnectPeer();
 
         hubConnection.invoke("FindMate");
     }
+    */
+}
+
+async function peerDisconnected() {
+    await disconnectPeer();
+    hubConnection.invoke("FindMate");
 }
 
 async function next() {
     await disconnectPeer();
-    hubConnection.invoke("FindMate");
+
+    hubConnection.invoke("DisconnectFromPeer", true);
 }
 
 async function join() {
@@ -216,9 +227,11 @@ async function go() {
 async function stop() {
     if(peerConnection) {
         await disconnectPeer();
+        hubConnection.invoke("DisconnectFromPeer", false); //also places user in stop status
     }
-
-    hubConnection.invoke("StopSearching");
+    else {
+        hubConnection.invoke("StopSearching"); //places user in stop status
+    }
 
     let peerColumn = document.getElementById("peer-column-content");
     peerColumn.hidden = true;
