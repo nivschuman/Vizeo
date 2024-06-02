@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Data;
+using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -27,6 +28,7 @@ namespace VideoProject.Hubs
             userModel.Gender = user.Gender;
             userModel.InterestedIn = user.InterestedIn;
             userModel.Status = 0;
+            userModel.PeerId = null;
 
             await dbContext.users.AddAsync(userModel);
             await dbContext.SaveChangesAsync();
@@ -98,6 +100,11 @@ namespace VideoProject.Hubs
             match.Status = 1;
             await dbContext.SaveChangesAsync();
 
+            //change peer id of both to eachother
+            user.PeerId = match.ConnectionId;
+            match.PeerId = user.ConnectionId;
+            await dbContext.SaveChangesAsync();
+
             //update peer user data
             await Clients.Client(user.ConnectionId).SendAsync("PeerData", JsonSerializer.Serialize(match));
             await Clients.Client(match.ConnectionId).SendAsync("PeerData", JsonSerializer.Serialize(user));
@@ -123,6 +130,49 @@ namespace VideoProject.Hubs
         public async Task PassCandidate(string toConnectionId, string candidate)
         {
             await Clients.Client(toConnectionId).SendAsync("HandleCandidate", Context.ConnectionId, candidate);
+        }
+
+        public async Task DisconnectFromPeer(bool findNewMate)
+        {
+            UserModel user = await dbContext.users.FindAsync(Context.ConnectionId);
+
+            if(user == null || user.PeerId == null)
+            {
+                return;
+            }
+
+            UserModel peer = await dbContext.users.FindAsync(user.PeerId);
+
+            if(peer == null)
+            {
+                return;
+            }
+
+            //remove peer id for both and change their status to waiting
+            user.PeerId = null;
+            user.Status = 2;
+            peer.PeerId = null;
+            peer.Status = 2;
+            await dbContext.SaveChangesAsync();
+
+            //We must make sure to have each user call FindMate one after the other
+            //This is in order to avoid race condition of two users sending offers to eachother at the same time
+            //This results in answer sdep cannot be set because connection is stable
+            //So we call FindMate for user to go back to waiting or find new peer
+            //Once that is complete, we announce to the peer that there was a disconnect, he disconnects connection and calls FindMate on his own
+
+            //invoke find mate for user to place him in waiting or find him new peer
+            //only called is user is interested in finding new mate, otherwise he just wanted to stop
+            if(findNewMate)
+            {
+                await FindMate();
+            }
+
+            //notfiy peer on disconnection and let him search for new peer
+            await Clients.Client(peer.ConnectionId).SendAsync("PeerDisconnected");
+
+            //chatting count changed, update counts
+            await UpdateCountsAll();
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)

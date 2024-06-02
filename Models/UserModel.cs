@@ -13,5 +13,6 @@ namespace VideoProject.Models
         public string Gender { get; set; }
         public string InterestedIn { get; set; }
         public int Status { get; set; }
+        public string? PeerId { get; set; }
     }
 }
