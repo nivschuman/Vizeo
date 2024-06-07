@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VideoProject")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+61a681820b22a9cd326deb4e1ff2ffe6ef9278b6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d67eaff80f2323ecc04b309eaf12f5d29f7845f4")]
 [assembly: System.Reflection.AssemblyProductAttribute("VideoProject")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VideoProject")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

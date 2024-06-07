@@ -26,6 +26,8 @@ let localStream;
 let remoteStream;
 let peerConnection;
 
+let bufferedIceCandidates = [];
+
 let hubConnection = new signalR.HubConnectionBuilder().withUrl("/Signals").build();
 let toConnectionId;
 
@@ -35,6 +37,7 @@ hubConnection.on("HandleAnswer", addAnswer);
 hubConnection.on("HandleCandidate", addCandidate);
 hubConnection.on("PeerData", updatePeerUserData);
 hubConnection.on("UpdateCounts", updateCounts);
+hubConnection.on("PeerDisconnected", peerDisconnected);
 
 async function setupDevice() {
     let stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
@@ -46,6 +49,10 @@ async function setupDevice() {
 }
 
 async function createPeerConnection() {
+    //clear out old buffered ice candidates
+    bufferedIceCandidates = []
+
+    //create new peer connection
     peerConnection = new RTCPeerConnection(configuration);
 
     //disable loading screen
@@ -91,6 +98,9 @@ async function doAnswer(tcId, offer) {
     offer = JSON.parse(offer);
     await peerConnection.setRemoteDescription(offer);
 
+    //remote description was added, add buffered ice candidates
+    bufferedIceCandidates.forEach(candidate => peerConnection.addIceCandidate(candidate));
+
     //doing answer
     let answer = await peerConnection.createAnswer();
     await peerConnection.setLocalDescription(answer);
@@ -117,13 +127,24 @@ async function addAnswer(tcId, answer) {
     answer = JSON.parse(answer);
 
     if(!peerConnection.currentRemoteDescription) {
-        peerConnection.setRemoteDescription(answer);
+        await peerConnection.setRemoteDescription(answer);
+
+        //remote description was added, add buffered ice candidates
+        bufferedIceCandidates.forEach(candidate => peerConnection.addIceCandidate(candidate));
     }
 }
 
+//TBD check fix for "the remote description was null" on addIceCandidate call
+//remote description must be set before trying to add candidates
 async function addCandidate(tcId, candidate) {
     toConnectionId = tcId;
     candidate = JSON.parse(candidate);
+
+    //remote description was not yet set, send ice candidate to buffer
+    if(!peerConnection.currentRemoteDescription) {
+        bufferedIceCandidates.push(candidate);
+        return;
+    }
 
     if(peerConnection) {
         peerConnection.addIceCandidate(candidate)
@@ -146,6 +167,8 @@ async function disconnectPeer() {
         peerConnection.onicecandidate = null;
         peerConnection.oniceconnectionsstatechange = null;
         peerConnection.onsignalingstatechange = null;
+
+        toConnectionId = null;
     
         await peerConnection.close();
     }
@@ -154,41 +177,68 @@ async function disconnectPeer() {
 }
 
 async function connectionStateChanged() {
+    /*
     if (peerConnection.iceConnectionState == "disconnected") {
         await disconnectPeer();
 
         hubConnection.invoke("FindMate");
     }
+    */
+}
+
+async function peerDisconnected() {
+    await disconnectPeer();
+    hubConnection.invoke("FindMate");
 }
 
 async function next() {
     await disconnectPeer();
-    hubConnection.invoke("FindMate");
+
+    hubConnection.invoke("DisconnectFromPeer", true);
 }
 
 async function join() {
     userData = await getUserData();
     let userDataJson = JSON.stringify(userData);
 
+    if(userData == null) {
+        return;
+    }
+
     hubConnection.invoke("Join", userDataJson);
 
-    let peerColumn = document.getElementById("peer-column");
+    let peerColumn = document.getElementById("peer-column-content");
     peerColumn.hidden = false;
 
     let goButton = document.getElementById("goButton");
     goButton.onclick = go;
 
-    await disableUserDataInput();
+    let nextButton = document.getElementById("nextButton");
+    nextButton.disabled = false;
+
+    let stopButton = document.getElementById("stopButton");
+    stopButton.disabled = false;
+
+    await disableUserDataInput(); //also disables go button
     await enableLoadingScreen();
 
     hubConnection.invoke("FindMate");
 }
 
 async function go() {
+    //disable go button
     let goButton = document.getElementById("goButton");
     goButton.disabled = true;
 
-    let peerColumn = document.getElementById("peer-column");
+    //enable next button
+    let nextButton = document.getElementById("nextButton");
+    nextButton.disabled = false;
+
+    //enable stop button
+    let stopButton = document.getElementById("stopButton");
+    stopButton.disabled = false;
+
+    let peerColumn = document.getElementById("peer-column-content");
     peerColumn.hidden = false;
 
     hubConnection.invoke("FindMate");
@@ -197,15 +247,26 @@ async function go() {
 async function stop() {
     if(peerConnection) {
         await disconnectPeer();
+        hubConnection.invoke("DisconnectFromPeer", false); //also places user in stop status
+    }
+    else {
+        hubConnection.invoke("StopSearching"); //places user in stop status
     }
 
-    hubConnection.invoke("StopSearching");
-
-    let peerColumn = document.getElementById("peer-column");
+    let peerColumn = document.getElementById("peer-column-content");
     peerColumn.hidden = true;
 
+    //enable go button
     let goButton = document.getElementById("goButton");
     goButton.disabled = false;
+
+    //disable next button
+    let nextButton = document.getElementById("nextButton");
+    nextButton.disabled = true;
+
+    //disable stop button
+    let stopButton = document.getElementById("stopButton");
+    stopButton.disabled = true;
 }
 
 async function start() {
@@ -231,6 +292,11 @@ async function getUserData() {
     let nameInput = document.getElementById("myNameInput");
     let name = nameInput.value;
 
+    if(name == "") {
+        alert("You need to enter a name!");
+        return null;
+    }
+
     let maleRadioButton = document.getElementById("maleRadioButton");
     let gender = maleRadioButton.checked ? "male" : "female";
 
@@ -240,6 +306,11 @@ async function getUserData() {
     let ageInput = document.getElementById("myAgeInput");
     let age = parseInt(ageInput.value);
 
+    if(isNaN(age) || (age < 18 || age > 120)) {
+        alert("Age must be bewteen 18 and 120!");
+        return null;
+    }
+
     let sameCountryCheckBox = document.getElementById("sameCountryCheckBox");
     let sameCountry = sameCountryCheckBox.checked ? "true" : "false";
 
@@ -248,6 +319,11 @@ async function getUserData() {
 
     let femalesCheckbox = document.getElementById("femalesCheckBox");
     let females = femalesCheckbox.checked ? "true" : "false";
+
+    if(males == "false" && females == "false") {
+        alert("You must choose male or female or both!");
+        return null;
+    }
 
     let interestedIn = `${sameCountry};${males};${females}`;
 
@@ -306,7 +382,7 @@ async function updatePeerUserData(peerModelJson)
     let peerAge = document.getElementById("peerAge");
     peerAge.textContent = peerModel.Age.toString();
 
-    let peerColumn = document.getElementById("peer-column");
+    let peerColumn = document.getElementById("peer-column-content");
     peerColumn.hidden = false;
 }
 

@@ -241,6 +241,10 @@
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.map"
     },
     {
+      "Id": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\media\\BG.png",
+      "PackagePath": "staticwebassets\\media\\BG.png"
+    },
+    {
       "Id": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\media\\LoadingScreen.mp4",
       "PackagePath": "staticwebassets\\media\\LoadingScreen.mp4"
     },
