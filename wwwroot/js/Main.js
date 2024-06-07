@@ -26,6 +26,8 @@ let localStream;
 let remoteStream;
 let peerConnection;
 
+let bufferedIceCandidates = [];
+
 let hubConnection = new signalR.HubConnectionBuilder().withUrl("/Signals").build();
 let toConnectionId;
 
@@ -47,6 +49,10 @@ async function setupDevice() {
 }
 
 async function createPeerConnection() {
+    //clear out old buffered ice candidates
+    bufferedIceCandidates = []
+
+    //create new peer connection
     peerConnection = new RTCPeerConnection(configuration);
 
     //disable loading screen
@@ -92,6 +98,9 @@ async function doAnswer(tcId, offer) {
     offer = JSON.parse(offer);
     await peerConnection.setRemoteDescription(offer);
 
+    //remote description was added, add buffered ice candidates
+    bufferedIceCandidates.forEach(candidate => peerConnection.addIceCandidate(candidate));
+
     //doing answer
     let answer = await peerConnection.createAnswer();
     await peerConnection.setLocalDescription(answer);
@@ -118,13 +127,24 @@ async function addAnswer(tcId, answer) {
     answer = JSON.parse(answer);
 
     if(!peerConnection.currentRemoteDescription) {
-        peerConnection.setRemoteDescription(answer);
+        await peerConnection.setRemoteDescription(answer);
+
+        //remote description was added, add buffered ice candidates
+        bufferedIceCandidates.forEach(candidate => peerConnection.addIceCandidate(candidate));
     }
 }
 
 async function addCandidate(tcId, candidate) {
     toConnectionId = tcId;
     candidate = JSON.parse(candidate);
+
+    //remote description was not yet set, send ice candidate to buffer
+    //remote description must be set before trying to add ice candidates
+    //otherwise we get error with addIceCandidate, remote description was null
+    if(!peerConnection.currentRemoteDescription) {
+        bufferedIceCandidates.push(candidate);
+        return;
+    }
 
     if(peerConnection) {
         peerConnection.addIceCandidate(candidate)
@@ -156,6 +176,8 @@ async function disconnectPeer() {
     await enableLoadingScreen();
 }
 
+//TBD fix blank video
+//probably caused due to the stream being assigned before connection state is "completed"
 async function connectionStateChanged() {
     /*
     if (peerConnection.iceConnectionState == "disconnected") {
