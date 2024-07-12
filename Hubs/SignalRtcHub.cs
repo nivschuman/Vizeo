@@ -11,9 +11,12 @@ namespace VideoProject.Hubs
     {
         private UserDbContext dbContext;
 
+        private readonly object connectToPeerLock;
+
         public SignalRtcHub(UserDbContext dbContext) : base()
         {
             this.dbContext = dbContext;
+            connectToPeerLock = new object();
         }
 
         public async Task Join(string userData)
@@ -50,55 +53,39 @@ namespace VideoProject.Hubs
             user.Status = 0;
             await dbContext.SaveChangesAsync();
 
-            //get interests
-            string[] interests = user.InterestedIn.Split(";");
-            bool sameCountry = bool.Parse(interests[0]);
-            bool male = bool.Parse(interests[1]);
-            bool female = bool.Parse(interests[2]);
-
-            //find match
+            //find match that user can connect to
             UserModel? match = null;
-            if(sameCountry)
-            {
-                if((male && female) || (!male && !female))
-                {
-                    match = dbContext.users.FirstOrDefault(other => other.Country == user.Country && other.Status == 0 && other.ConnectionId != user.ConnectionId);
-                }
-                else if(male && !female)
-                {
-                    match = dbContext.users.FirstOrDefault(other => other.Country == user.Country && other.Gender == "male" && other.Status == 0 && other.ConnectionId != user.ConnectionId);
-                }
-                else if(!male && female)
-                {
-                    match = dbContext.users.FirstOrDefault(other => other.Country == user.Country && other.Gender == "female" && other.Status == 0 && other.ConnectionId != user.ConnectionId);
-                }
-            }
-            else
-            {
-                if((male && female) || (!male && !female))
-                {
-                    match = dbContext.users.FirstOrDefault(other => other.Status == 0 && other.ConnectionId != user.ConnectionId);
-                }
-                else if(male && !female)
-                {
-                    match = dbContext.users.FirstOrDefault(other => other.Gender == "male" && other.Status == 0 && other.ConnectionId != user.ConnectionId);
-                }
-                else if(!male && female)
-                {
-                    match = dbContext.users.FirstOrDefault(other => other.Gender == "female" && other.Status == 0 && other.ConnectionId != user.ConnectionId);
-                }
-            }
+            bool canConnect = false;
 
-            //no match was found
-            if(match == null)
+            while(!canConnect)
             {
-                return;
-            }
+                match = GetMatch(user);
 
-            //change status of both to 1, connecting status
-            user.Status = 1;
-            match.Status = 1;
-            await dbContext.SaveChangesAsync();
+                //no match was found
+                if(match == null)
+                {
+                    return;
+                }
+
+                //try to set connecting status
+                lock(connectToPeerLock)
+                {
+                    //RACE CONDITION FIX
+                    //another user got the same match and already connected to him, need to find different mate
+                    if(match.Status == 1)
+                    {
+                        canConnect = false;
+                    }
+                    //change status of both to 1, connecting status
+                    else
+                    {                   
+                        user.Status = 1;
+                        match.Status = 1;
+                        dbContext.SaveChanges();
+                        canConnect = true;
+                    }
+                }
+            }
 
             //change peer id of both to eachother
             user.PeerId = match.ConnectionId;
@@ -118,7 +105,7 @@ namespace VideoProject.Hubs
 
         public async Task PassOffer(string toConnectionId, string offer)
         {
-            //TBD check if accidently trying to send offer to already connected user
+            //TBD is it possible that we accidently pass an offer to a stopped peer (status 2)!?
             await Clients.Client(toConnectionId).SendAsync("SendAnswer", Context.ConnectionId, offer);
         }
 
@@ -157,12 +144,12 @@ namespace VideoProject.Hubs
 
             //We must make sure to have each user call FindMate one after the other
             //This is in order to avoid race condition of two users sending offers to eachother at the same time
-            //This results in answer sdep cannot be set because connection is stable
+            //This results in answer sdp cannot be set because connection is stable
             //So we call FindMate for user to go back to waiting or find new peer
             //Once that is complete, we announce to the peer that there was a disconnect, he disconnects connection and calls FindMate on his own
 
             //invoke find mate for user to place him in waiting or find him new peer
-            //only called is user is interested in finding new mate, otherwise he just wanted to stop
+            //only called if user is interested in finding new mate, otherwise he just wanted to stop
             if(findNewMate)
             {
                 await FindMate();
@@ -223,6 +210,51 @@ namespace VideoProject.Hubs
             //set user status to 2, stopped status
             user.Status = 2;
             await dbContext.SaveChangesAsync();
+        }
+
+        //find matching peer for user, returns null if there is no match
+        private UserModel? GetMatch(UserModel user)
+        {
+            //get interests
+            string[] interests = user.InterestedIn.Split(";");
+            bool sameCountry = bool.Parse(interests[0]);
+            bool male = bool.Parse(interests[1]);
+            bool female = bool.Parse(interests[2]);
+
+            //search for match
+            UserModel? match = null;
+            if(sameCountry)
+            {
+                if((male && female) || (!male && !female))
+                {
+                    match = dbContext.users.FirstOrDefault(other => other.Country == user.Country && other.Status == 0 && other.ConnectionId != user.ConnectionId);
+                }
+                else if(male && !female)
+                {
+                    match = dbContext.users.FirstOrDefault(other => other.Country == user.Country && other.Gender == "male" && other.Status == 0 && other.ConnectionId != user.ConnectionId);
+                }
+                else if(!male && female)
+                {
+                    match = dbContext.users.FirstOrDefault(other => other.Country == user.Country && other.Gender == "female" && other.Status == 0 && other.ConnectionId != user.ConnectionId);
+                }
+            }
+            else
+            {
+                if((male && female) || (!male && !female))
+                {
+                    match = dbContext.users.FirstOrDefault(other => other.Status == 0 && other.ConnectionId != user.ConnectionId);
+                }
+                else if(male && !female)
+                {
+                    match = dbContext.users.FirstOrDefault(other => other.Gender == "male" && other.Status == 0 && other.ConnectionId != user.ConnectionId);
+                }
+                else if(!male && female)
+                {
+                    match = dbContext.users.FirstOrDefault(other => other.Gender == "female" && other.Status == 0 && other.ConnectionId != user.ConnectionId);
+                }
+            }
+
+            return match;
         }
 
         private async Task UpdateCountsAll()
