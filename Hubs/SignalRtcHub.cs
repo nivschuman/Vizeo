@@ -38,7 +38,7 @@ namespace VideoProject.Hubs
 
         public async Task FindMate()
         {
-            UserModel user = await dbContext.users.FindAsync(Context.ConnectionId);
+            UserModel? user = await dbContext.users.FindAsync(Context.ConnectionId);
 
             //has not joined yet, not in database
             if(user == null)
@@ -57,7 +57,7 @@ namespace VideoProject.Hubs
             bool female = bool.Parse(interests[2]);
 
             //find match
-            UserModel match = null;
+            UserModel? match = null;
             if(sameCountry)
             {
                 if((male && female) || (!male && !female))
@@ -134,21 +134,21 @@ namespace VideoProject.Hubs
 
         public async Task DisconnectFromPeer(bool findNewMate)
         {
-            UserModel user = await dbContext.users.FindAsync(Context.ConnectionId);
+            UserModel? user = await dbContext.users.FindAsync(Context.ConnectionId);
 
             if(user == null || user.PeerId == null)
             {
                 return;
             }
 
-            UserModel peer = await dbContext.users.FindAsync(user.PeerId);
+            UserModel? peer = await dbContext.users.FindAsync(user.PeerId);
 
             if(peer == null)
             {
                 return;
             }
 
-            //remove peer id for both and change their status to waiting
+            //remove peer id for both and change their status to stopped
             user.PeerId = null;
             user.Status = 2;
             peer.PeerId = null;
@@ -177,15 +177,25 @@ namespace VideoProject.Hubs
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            UserModel user = await dbContext.users.FindAsync(Context.ConnectionId);
+            UserModel? user = await dbContext.users.FindAsync(Context.ConnectionId);
 
-            if(user != null)
+            //no user to remove and disconnect
+            if(user == null)
             {
-                dbContext.Remove(user);
+                return;
             }
 
+            //disconnect peer from user
+            if(user.PeerId != null)
+            {
+                await DisconnectFromPeer(false);
+            }
+
+            //remove user from database
+            dbContext.Remove(user);
             await dbContext.SaveChangesAsync();
 
+            //update counts for all
             await UpdateCountsAll();
 
             await base.OnDisconnectedAsync(exception);
@@ -202,7 +212,7 @@ namespace VideoProject.Hubs
 
         public async Task StopSearching()
         {
-            UserModel user = await dbContext.users.FindAsync(Context.ConnectionId);
+            UserModel? user = await dbContext.users.FindAsync(Context.ConnectionId);
 
             //user doesn't exist or is connected to other user (cannot stop mid connection, must disconnect first)
             if(user == null || user.Status == 1)
