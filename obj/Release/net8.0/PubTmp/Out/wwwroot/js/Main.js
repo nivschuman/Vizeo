@@ -134,13 +134,13 @@ async function addAnswer(tcId, answer) {
     }
 }
 
-//TBD check fix for "the remote description was null" on addIceCandidate call
-//remote description must be set before trying to add candidates
 async function addCandidate(tcId, candidate) {
     toConnectionId = tcId;
     candidate = JSON.parse(candidate);
 
     //remote description was not yet set, send ice candidate to buffer
+    //remote description must be set before trying to add ice candidates
+    //otherwise we get error with addIceCandidate, remote description was null
     if(!peerConnection.currentRemoteDescription) {
         bufferedIceCandidates.push(candidate);
         return;
@@ -176,6 +176,8 @@ async function disconnectPeer() {
     await enableLoadingScreen();
 }
 
+//TBD fix blank video
+//probably caused due to the stream being assigned before connection state is "completed"
 async function connectionStateChanged() {
     /*
     if (peerConnection.iceConnectionState == "disconnected") {
