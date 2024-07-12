@@ -92,6 +92,27 @@ namespace VideoProject.Hubs
             match.PeerId = user.ConnectionId;
             await dbContext.SaveChangesAsync();
 
+            //update connection time between peer and match
+            UserConnectionModel userConnection = dbContext.userConnections.FirstOrDefault(ucm => 
+            (ucm.User1ConnectionId == user.ConnectionId && ucm.User2ConnectionId == match.ConnectionId) || 
+            (ucm.User1ConnectionId == match.ConnectionId && ucm.User2ConnectionId == user.ConnectionId));
+
+            if(userConnection == null)
+            {
+                userConnection = new UserConnectionModel();
+                userConnection.User1ConnectionId = user.ConnectionId;
+                userConnection.User2ConnectionId = match.ConnectionId;
+                userConnection.ConnectedTime = DateTime.Now;
+
+                await dbContext.userConnections.AddAsync(userConnection);
+            }
+            else
+            {
+                userConnection.ConnectedTime = DateTime.Now;
+            }
+
+            await dbContext.SaveChangesAsync();
+
             //update peer user data
             await Clients.Client(user.ConnectionId).SendAsync("PeerData", JsonSerializer.Serialize(match));
             await Clients.Client(match.ConnectionId).SendAsync("PeerData", JsonSerializer.Serialize(user));
@@ -105,7 +126,7 @@ namespace VideoProject.Hubs
 
         public async Task PassOffer(string toConnectionId, string offer)
         {
-            //TBD is it possible that we accidently pass an offer to a stopped peer (status 2)!?
+            //TBD is it possible that we accidentally pass an offer to a stopped peer (status 2)!?
             await Clients.Client(toConnectionId).SendAsync("SendAnswer", Context.ConnectionId, offer);
         }
 
@@ -178,6 +199,13 @@ namespace VideoProject.Hubs
                 await DisconnectFromPeer(false);
             }
 
+            //remove all userConnections tied to user
+            IEnumerable<UserConnectionModel> userConnections = dbContext.userConnections.Where(ucm => ucm.User1ConnectionId == user.ConnectionId || ucm.User2ConnectionId == user.ConnectionId);
+            foreach(UserConnectionModel userConnection in userConnections)
+            {
+                dbContext.Remove(userConnection);
+            }
+
             //remove user from database
             dbContext.Remove(user);
             await dbContext.SaveChangesAsync();
@@ -222,39 +250,68 @@ namespace VideoProject.Hubs
             bool female = bool.Parse(interests[2]);
 
             //search for match
-            UserModel? match = null;
+            List<UserModel> matches = null;
             if(sameCountry)
             {
                 if((male && female) || (!male && !female))
                 {
-                    match = dbContext.users.FirstOrDefault(other => other.Country == user.Country && other.Status == 0 && other.ConnectionId != user.ConnectionId);
+                    matches = dbContext.users.Where(other => other.Country == user.Country && other.Status == 0 && other.ConnectionId != user.ConnectionId).ToList();
                 }
                 else if(male && !female)
                 {
-                    match = dbContext.users.FirstOrDefault(other => other.Country == user.Country && other.Gender == "male" && other.Status == 0 && other.ConnectionId != user.ConnectionId);
+                    matches = dbContext.users.Where(other => other.Country == user.Country && other.Gender == "male" && other.Status == 0 && other.ConnectionId != user.ConnectionId).ToList();
                 }
                 else if(!male && female)
                 {
-                    match = dbContext.users.FirstOrDefault(other => other.Country == user.Country && other.Gender == "female" && other.Status == 0 && other.ConnectionId != user.ConnectionId);
+                    matches = dbContext.users.Where(other => other.Country == user.Country && other.Gender == "female" && other.Status == 0 && other.ConnectionId != user.ConnectionId).ToList();
                 }
             }
             else
             {
                 if((male && female) || (!male && !female))
                 {
-                    match = dbContext.users.FirstOrDefault(other => other.Status == 0 && other.ConnectionId != user.ConnectionId);
+                    matches = dbContext.users.Where(other => other.Status == 0 && other.ConnectionId != user.ConnectionId).ToList();
                 }
                 else if(male && !female)
                 {
-                    match = dbContext.users.FirstOrDefault(other => other.Gender == "male" && other.Status == 0 && other.ConnectionId != user.ConnectionId);
+                    matches = dbContext.users.Where(other => other.Gender == "male" && other.Status == 0 && other.ConnectionId != user.ConnectionId).ToList();
                 }
                 else if(!male && female)
                 {
-                    match = dbContext.users.FirstOrDefault(other => other.Gender == "female" && other.Status == 0 && other.ConnectionId != user.ConnectionId);
+                    matches = dbContext.users.Where(other => other.Gender == "female" && other.Status == 0 && other.ConnectionId != user.ConnectionId).ToList();
                 }
             }
 
-            return match;
+            //find match farthest from now datetime
+            UserModel bestMatch = null;
+            double bestDiff = double.NegativeInfinity;
+
+            DateTime nowDateTime = DateTime.Now;
+
+            foreach(UserModel match in matches)
+            {
+                UserConnectionModel userConnection = dbContext.userConnections.FirstOrDefault(ucm => 
+                (ucm.User1ConnectionId == user.ConnectionId && ucm.User2ConnectionId == match.ConnectionId) || 
+                (ucm.User1ConnectionId == match.ConnectionId && ucm.User2ConnectionId == user.ConnectionId));
+
+                //user and match have never connected before
+                if(userConnection == null)
+                {
+                    bestMatch = match;
+                    bestDiff = double.PositiveInfinity;
+                    break;
+                }
+
+                double curDiff = Math.Abs((nowDateTime - userConnection.ConnectedTime).TotalSeconds);
+
+                if(curDiff > bestDiff)
+                {
+                    bestMatch = match;
+                    bestDiff = curDiff;
+                }
+            }
+
+            return bestMatch;
         }
 
         private async Task UpdateCountsAll()
