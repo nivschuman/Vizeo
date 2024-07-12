@@ -58,11 +58,8 @@ async function createPeerConnection() {
     //disable loading screen
     await disableLoadingScreen();
 
-    //remote stream
+    //intialize remote stream
     remoteStream = new MediaStream();
-    let peer_video = document.getElementById("peer-video");
-    peer_video.src = "";
-    peer_video.srcObject = remoteStream;
 
     //local stream tracks
     localStream.getTracks().forEach(track => {
@@ -177,8 +174,17 @@ async function disconnectPeer() {
 }
 
 //TBD fix blank video
-//probably caused due to the stream being assigned before connection state is "completed"
+//TBD why is connection state never in "completed" state!?
 async function connectionStateChanged() {
+    console.log(peerConnection.iceConnectionState);
+
+    //place remote stream onto peer video element only once connection state is "connected"
+    if(peerConnection.iceConnectionState == "connected") {
+        let peer_video = document.getElementById("peer-video");
+        peer_video.src = "";
+        peer_video.srcObject = remoteStream;
+    }
+
     /*
     if (peerConnection.iceConnectionState == "disconnected") {
         await disconnectPeer();
@@ -369,8 +375,6 @@ async function disableUserDataInput() {
 async function updatePeerUserData(peerModelJson)
 {
     let peerModel = JSON.parse(peerModelJson);
-
-    console.log(peerModel);
 
     let peerName = document.getElementById("peerName");
     peerName.textContent = peerModel.Name;
