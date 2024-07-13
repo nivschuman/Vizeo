@@ -114,6 +114,7 @@ async function doCandidate(event) {
 async function gotRemoteTrack(event) {
     console.log("got remote stream");
     console.log(event.streams);
+    
     event.streams[0].getTracks().forEach(track => {
         remoteStream.addTrack(track); 
     });
