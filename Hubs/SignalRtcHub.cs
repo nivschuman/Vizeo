@@ -93,7 +93,7 @@ namespace VideoProject.Hubs
             await dbContext.SaveChangesAsync();
 
             //update connection time between peer and match
-            UserConnectionModel userConnection = dbContext.userConnections.FirstOrDefault(ucm => 
+            UserConnectionModel? userConnection = dbContext.userConnections.FirstOrDefault(ucm => 
             (ucm.User1ConnectionId == user.ConnectionId && ucm.User2ConnectionId == match.ConnectionId) || 
             (ucm.User1ConnectionId == match.ConnectionId && ucm.User2ConnectionId == user.ConnectionId));
 
@@ -250,7 +250,7 @@ namespace VideoProject.Hubs
             bool female = bool.Parse(interests[2]);
 
             //search for match
-            List<UserModel> matches = null;
+            List<UserModel> matches = new List<UserModel>();
             if(sameCountry)
             {
                 if((male && female) || (!male && !female))
@@ -282,17 +282,18 @@ namespace VideoProject.Hubs
                 }
             }
 
+            //get all user connections with user
+            List<UserConnectionModel> userConnections = dbContext.userConnections.Where(ucm => ucm.User1ConnectionId == user.ConnectionId || ucm.User2ConnectionId == user.ConnectionId).ToList();
+
             //find match farthest from now datetime
-            UserModel bestMatch = null;
+            UserModel? bestMatch = null;
             double bestDiff = double.NegativeInfinity;
 
             DateTime nowDateTime = DateTime.Now;
 
             foreach(UserModel match in matches)
             {
-                UserConnectionModel userConnection = dbContext.userConnections.FirstOrDefault(ucm => 
-                (ucm.User1ConnectionId == user.ConnectionId && ucm.User2ConnectionId == match.ConnectionId) || 
-                (ucm.User1ConnectionId == match.ConnectionId && ucm.User2ConnectionId == user.ConnectionId));
+                UserConnectionModel? userConnection = userConnections.FirstOrDefault(ucm => ucm.User1ConnectionId == match.ConnectionId || ucm.User2ConnectionId == match.ConnectionId);
 
                 //user and match have never connected before
                 if(userConnection == null)
