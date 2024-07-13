@@ -26,6 +26,9 @@ let localStream;
 let remoteStream;
 let peerConnection;
 
+let sendDataChannel;
+let receiveDataChannel;
+
 let bufferedIceCandidates = [];
 
 let hubConnection = new signalR.HubConnectionBuilder().withUrl("/Signals").build();
@@ -66,6 +69,12 @@ async function createPeerConnection() {
         peerConnection.addTrack(track, localStream);
     });
 
+    //create sending data channel
+    sendDataChannel = peerConnection.createDataChannel("ChatChannel");
+
+    //send data channel open event
+    sendDataChannel.onopen = () => { setMessageSendingState(false); };
+
     //ontrack event
     peerConnection.ontrack = gotRemoteTrack;
 
@@ -74,6 +83,9 @@ async function createPeerConnection() {
 
     //onconnectionstatechange event
     peerConnection.onconnectionstatechange = connectionStateChanged;
+
+    //ondatachannel event
+    peerConnection.ondatachannel = gotDataChannel;
 }
 
 async function doOffer(tcId) {
@@ -149,6 +161,45 @@ async function addCandidate(tcId, candidate) {
     }
 }
 
+async function gotDataChannel(event) {
+    receiveDataChannel = event.channel;
+    receiveDataChannel.onmessage = receivedMessage;
+}
+
+async function receivedMessage(event) {
+    message = event.data
+
+    await generateReceivedChatMessage(message);
+}
+
+async function sendMessage() {
+    if(sendDataChannel == null) {
+        return;
+    }
+
+    let messageToSendInput = document.getElementById("send-message-input");
+    let messageToSend = messageToSendInput.value;
+
+    await generateSentChatMessage(messageToSend);
+    sendDataChannel.send(messageToSend);
+
+    messageToSendInput.value = "";
+}
+
+async function closeDataChannels() {
+    //close send data channel
+    if(sendDataChannel != null) {
+        sendDataChannel.close();
+        sendDataChannel = null;
+    }
+
+    //close receive data channel
+    if(receiveDataChannel != null) {
+        receiveDataChannel.close();
+        receiveDataChannel = null;
+    }
+}
+
 async function startHubConnection() {
     try {
         await hubConnection.start();
@@ -167,6 +218,10 @@ async function disconnectPeer() {
         peerConnection.onsignalingstatechange = null;
 
         toConnectionId = null;
+
+        await closeDataChannels();
+        await clearChat();
+        await setMessageSendingState(true);
     
         await peerConnection.close();
     }
@@ -180,7 +235,7 @@ async function connectionStateChanged() {
     console.log(peerConnection.iceConnectionState);
 
     //place remote stream onto peer video element only once connection state is "connected"
-    if(peerConnection.iceConnectionState == "connected") {
+    if(peerConnection.iceConnectionState == "connected" || peerConnection.iceConnectionState == "completed") {
         let peer_video = document.getElementById("peer-video");
         peer_video.src = "";
         peer_video.srcObject = remoteStream;
@@ -294,6 +349,9 @@ async function start() {
     let stopButton = document.getElementById("stopButton");
     stopButton.onclick = stop;
 
+    let sendMessageButton = document.getElementById("sendMessageButton");
+    sendMessageButton.onclick = sendMessage;
+
     await hubConnection.invoke("UpdateCountsClient");
 }
 
@@ -405,6 +463,10 @@ async function enableLoadingScreen() {
     //hide peer data
     let peer_info = document.getElementById("peer-info-container");
     peer_info.hidden = true;
+
+    //hide chat box
+    let chat_box = document.getElementById("chat-box");
+    chat_box.hidden = true;
 }
 
 async function disableLoadingScreen() {
@@ -417,6 +479,10 @@ async function disableLoadingScreen() {
     //show peer data
     let peer_info = document.getElementById("peer-info-container");
     peer_info.hidden = false;
+
+    //show chat box
+    let chat_box = document.getElementById("chat-box");
+    chat_box.hidden = false;
 }
 
 async function updateCounts(males, females, chatting) {
@@ -427,6 +493,117 @@ async function updateCounts(males, females, chatting) {
     maleCount.innerText = `Males: ${males}`;
     femaleCount.innerText = `Females: ${females}`;
     chattingCount.innerText = `Chatting: ${chatting}`;
+}
+
+async function generateReceivedChatMessage(message) {
+    const chatMessages = document.getElementById('chat-messages');
+
+    // Create the main container div
+    const mediaDiv = document.createElement('div');
+    mediaDiv.className = 'media w-50 mb-3';
+
+    // Create the image element
+    const img = document.createElement('img');
+    img.src = '../media/Profile.png'; // Ensure this path is correct for your project
+    img.alt = 'peer';
+    img.width = 50;
+    img.className = 'rounded-circle';
+    mediaDiv.appendChild(img);
+
+    // Create the media-body div
+    const mediaBodyDiv = document.createElement('div');
+    mediaBodyDiv.className = 'media-body ml-3';
+    mediaDiv.appendChild(mediaBodyDiv);
+
+    // Create the message container div
+    const messageContainerDiv = document.createElement('div');
+    messageContainerDiv.className = 'bg-light rounded py-2 px-3 mb-2';
+    mediaBodyDiv.appendChild(messageContainerDiv);
+
+    // Create the message paragraph
+    const messageParagraph = document.createElement('p');
+    messageParagraph.className = 'text-small mb-0 text-muted';
+    messageParagraph.innerText = message;
+    messageContainerDiv.appendChild(messageParagraph);
+
+    // Create the date paragraph
+    const dateParagraph = document.createElement('p');
+    dateParagraph.className = 'small text-muted';
+    const now = new Date();
+    const hours = now.getHours() > 12 ? now.getHours() - 12 : now.getHours();
+    const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const timeString = `${hours}:${minutes} ${ampm}`;
+    const dateString = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    dateParagraph.innerText = `${timeString} | ${dateString}`;
+    mediaBodyDiv.appendChild(dateParagraph);
+
+    // Append the generated message to the chat messages container
+    chatMessages.appendChild(mediaDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to the bottom
+}
+
+async function generateSentChatMessage(message) {
+    const chatMessages = document.getElementById('chat-messages');
+
+    // Create the main container div
+    const mediaDiv = document.createElement('div');
+    mediaDiv.className = 'media w-50 ml-auto mb-3';
+
+    // Create the image element
+    const img = document.createElement('img');
+    img.src = '../media/Me.png'; // Ensure this path is correct for your project
+    img.alt = 'peer';
+    img.width = 50;
+    img.className = 'rounded-circle';
+    mediaDiv.appendChild(img);
+
+    // Create the media-body div
+    const mediaBodyDiv = document.createElement('div');
+    mediaBodyDiv.className = 'media-body';
+    mediaDiv.appendChild(mediaBodyDiv);
+
+    // Create the message container div
+    const messageContainerDiv = document.createElement('div');
+    messageContainerDiv.className = 'bg-primary rounded py-2 px-3 mb-2';
+    mediaBodyDiv.appendChild(messageContainerDiv);
+
+    // Create the message paragraph
+    const messageParagraph = document.createElement('p');
+    messageParagraph.className = 'text-small mb-0 text-white';
+    messageParagraph.innerText = message;
+    messageContainerDiv.appendChild(messageParagraph);
+
+    // Create the date paragraph
+    const dateParagraph = document.createElement('p');
+    dateParagraph.className = 'small text-muted';
+    const now = new Date();
+    const hours = now.getHours() > 12 ? now.getHours() - 12 : now.getHours();
+    const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const timeString = `${hours}:${minutes} ${ampm}`;
+    const dateString = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    dateParagraph.innerText = `${timeString} | ${dateString}`;
+    mediaBodyDiv.appendChild(dateParagraph);
+
+    // Append the generated message to the chat messages container
+    chatMessages.appendChild(mediaDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to the bottom
+}
+
+async function clearChat() {
+    const chatMessages = document.getElementById('chat-messages');
+    while (chatMessages.firstChild) {
+        chatMessages.removeChild(chatMessages.lastChild);
+    }
+}
+
+async function setMessageSendingState(disable) {
+    let sendMessageInput = document.getElementById("send-message-input");
+    sendMessageInput.disabled = disable;
+
+    let sendMessageButton = document.getElementById("sendMessageButton");
+    sendMessageButton.disabled = disable;
 }
 
 start();

@@ -9,16 +9,21 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Vizeo</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
         <link href="~/css/site.css" rel="stylesheet">
     </head>
     <body>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <a class="navbar-brand">Vizeo</a>
+
+            <a class="navbar-brand count-item" id="maleCount">Males: 0</a>
+            <a class="navbar-brand count-item" id="femaleCount">Females: 0</a>
+            <a class="navbar-brand count-item" id="chattingCount">Chatting: 0</a>
         </nav>
         
         <div class="container-fluid mt-4">    
             <div class="row">
-                <div class="col-md-6 left-column">                
+                <div class="col-md-4 left-column">            
                     <div class="video-wrapper">
                         <video autoplay id="my-video" muted></video>
                     </div>
@@ -335,13 +340,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-4 middle-column">                    
-                    <button type="button" class="btn3d btn btn-success btn-lg btn-block mt-2" id="goButton">Go!</button>
-                    <button type="button" class="btn3d btn btn-danger btn-lg btn-block mt-2" id="stopButton" disabled>Stop!</button> 
-                    <button type="button" class="btn3d btn btn-primary btn-lg btn-block mt-2" id="nextButton" disabled>Next</button>                   
-                </div>
-
-                <div class="col-md-6 right-column" id="peer-column">
+                <div class="col-md-4 middle-column" id="peer-column">
                     <div id="peer-column-content" hidden>
                         <div class="video-wrapper">
                             <video autoplay id="peer-video"></video>
@@ -363,12 +362,34 @@
                         </div>
                     </div>
                 </div>
+                
+                <div class="col-md-4 chat-column">
+                    <!-- Chat Box-->
+                    <div id="chat-box" hidden>
+                        <div class="px-4 py-5 chat-box bg-white" id="chat-messages">
+                        </div>
+
+                        <!-- Typing area -->
+                        <div class="bg-light">
+                            <div class="input-group">
+                                <input disabled id="send-message-input" type="text" placeholder="Type a message" aria-describedby="sendMessageButton" class="form-control rounded-0 border-0 py-4 bg-light">
+                                <div class="input-group-append">
+                                    <button disabled id="sendMessageButton" type="submit" class="btn btn-link"> <i class="fa fa-paper-plane"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row action-buttons">
+                <button type="button" class="btn3d btn btn-success btn-lg btn-block mt-2" id="goButton">Go!</button>
+                <button type="button" class="btn3d btn btn-danger btn-lg btn-block mt-2" id="stopButton" disabled>Stop!</button> 
+                <button type="button" class="btn3d btn btn-primary btn-lg btn-block mt-2" id="nextButton" disabled>Next</button>       
             </div>
 
             <div class="row">
-                <div class="count-item" id="maleCount">Males: 0</div>
-                <div class="count-item" id="femaleCount">Females: 0</div>
-                <div class="count-item" id="chattingCount">Chatting: 0</div>
+
             </div>
         </div>
         
@@ -381,6 +402,7 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
+        <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
         <script src="~/js/Main.js"></script>
    </body>
 </html>

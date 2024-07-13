@@ -22,12 +22,17 @@ body {
   font-weight: bold;
 }
 
-.left-column, .right-column, .middle-column {
+  
+.count-item {
+  color: lightblue;
+  margin-right: 10px;
+}
+
+.left-column, .middle-column, .chat-column {
   padding: 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-
 }
 
 .label-column {
@@ -38,35 +43,33 @@ body {
   background-color: #7b8be6;
   width: 400px;
   margin-right: 20px;
-  
+}
+
+.chat-column {
+  background-color: #11b9e4;
+  width: 400px;
+  margin-left: 20px;
+}
+
+.action-buttons {
+  background-color: transparent;
+  margin-right: 15px;
+  justify-content: left;
+  align-items: center;
 }
 
 .middle-column {
-  background-color: transparent;
-  margin-right: 15px;
-  width: 120px;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-   
-}
-
-.right-column {
   background-color: #e4e4e4;
   width: 400px;
   border: 1px solid #000;
-  
 }
 
 .container-fluid {
   padding: 20px;
-
 }
-
 
 .row {
   margin: 0;
-  
 }
 
 .col-md-6 {
@@ -138,17 +141,6 @@ button:hover {
   background-color: #0056b3;
 }
 
-
-.count-item {
-  margin-top: 10px;
-  background-color:   white;
-  color: black;
-  border: 1px solid black;
-  border-radius: 4px;
-  width: 120px;
-  margin-right: 20px;
-}
-
 footer {
   background-color: #343a40;
   color: #fff;
@@ -165,7 +157,7 @@ footer {
 	margin-top: 10px;
 	margin-bottom: 10px;
 	margin-left: 2px;
-	margin-right: 2px;
+	margin-right: 8px;
 }
 
 .btn3d.btn-success {
@@ -199,4 +191,39 @@ footer {
 .btn3d.btn-primary.active {
 	box-shadow: 0 0 0 1px #417fbd inset, 0 0 0 1px rgba(255, 255, 255, 0.15) inset, 0 1px 3px 1px rgba(0, 0, 0, 0.3);
 	background-color: #4274D7;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  width: 5px;
+  background: #f5f5f5;
+}
+
+::-webkit-scrollbar-thumb {
+  width: 1em;
+  background-color: #ddd;
+  outline: 1px solid slategrey;
+  border-radius: 1rem;
+}
+
+.text-small {
+  font-size: 0.9rem;
+}
+
+.messages-box,
+.chat-box {
+  height: 510px;
+  overflow-y: scroll;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+input::placeholder {
+  font-size: 0.9rem;
+  color: #999;
 }
