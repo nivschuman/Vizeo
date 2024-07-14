@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "b7PZglDBme+/z28PIfjadj1pCnckvuY3y01ylhK+QVU=",
+  "Hash": "7HmF3NbxNiFT9JS3lM9Ws2oj0QN0/9INLOcKL1bgq/A=",
   "Source": "VideoProject",
   "BasePath": "_content/VideoProject",
   "Mode": "Default",
@@ -1193,6 +1193,44 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\media\\LoadingScreen.mp4"
+    },
+    {
+      "Identity": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\media\\Me.png",
+      "SourceId": "VideoProject",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\",
+      "BasePath": "_content/VideoProject",
+      "RelativePath": "media/Me.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\media\\Me.png"
+    },
+    {
+      "Identity": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\media\\Profile.png",
+      "SourceId": "VideoProject",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\",
+      "BasePath": "_content/VideoProject",
+      "RelativePath": "media/Profile.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\media\\Profile.png"
     }
   ]
 }

@@ -249,13 +249,14 @@ namespace VideoProject.Hubs
             bool male = bool.Parse(interests[1]);
             bool female = bool.Parse(interests[2]);
 
-            //search for match
+            //search for matches which fit user's interests
             List<UserModel> matches = new List<UserModel>();
             if(sameCountry)
             {
                 if((male && female) || (!male && !female))
                 {
-                    matches = dbContext.users.Where(other => other.Country == user.Country && other.Status == 0 && other.ConnectionId != user.ConnectionId).ToList();
+                    matches = dbContext.users.Where(
+                        other => other.Country == user.Country && other.Status == 0 && other.ConnectionId != user.ConnectionId).ToList();
                 }
                 else if(male && !female)
                 {
@@ -281,6 +282,9 @@ namespace VideoProject.Hubs
                     matches = dbContext.users.Where(other => other.Gender == "female" && other.Status == 0 && other.ConnectionId != user.ConnectionId).ToList();
                 }
             }
+
+            //filter matches to consider matching peers interests
+            matches = matches.Where(match => { return match.IsInterestedIn(user); }).ToList();
 
             //get all user connections with user
             List<UserConnectionModel> userConnections = dbContext.userConnections.Where(ucm => ucm.User1ConnectionId == user.ConnectionId || ucm.User2ConnectionId == user.ConnectionId).ToList();

@@ -249,6 +249,14 @@
       "PackagePath": "staticwebassets\\media\\LoadingScreen.mp4"
     },
     {
+      "Id": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\media\\Me.png",
+      "PackagePath": "staticwebassets\\media\\Me.png"
+    },
+    {
+      "Id": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\media\\Profile.png",
+      "PackagePath": "staticwebassets\\media\\Profile.png"
+    },
+    {
       "Id": "obj\\Release\\net8.0\\staticwebassets\\msbuild.VideoProject.Microsoft.AspNetCore.StaticWebAssets.props",
       "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
     },

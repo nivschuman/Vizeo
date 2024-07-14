@@ -43,7 +43,25 @@ hubConnection.on("UpdateCounts", updateCounts);
 hubConnection.on("PeerDisconnected", peerDisconnected);
 
 async function setupDevice() {
-    let stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+    let stream = null;
+
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+    }
+    catch(error) {
+        if(error instanceof DOMException && error.name == "NotAllowedError") {
+            alert("You must allow video and audio in order to use the website!");
+        }
+        else if(error instanceof DOMException && error.name == "NotFoundError") {
+            alert("Video and audio to use for website were not found!");
+        }
+        else {
+            alert(`Error with getting user media: ${error}`);
+        }
+
+        let goButton = document.getElementById("goButton");
+        goButton.disabled = true;
+    }
 
     let my_video = document.getElementById("my-video");
     my_video.srcObject = stream;
@@ -467,6 +485,10 @@ async function enableLoadingScreen() {
     //hide chat box
     let chat_box = document.getElementById("chat-box");
     chat_box.hidden = true;
+
+    //disable next button
+    let nextButton = document.getElementById("nextButton");
+    nextButton.disabled = true;
 }
 
 async function disableLoadingScreen() {
@@ -483,6 +505,10 @@ async function disableLoadingScreen() {
     //show chat box
     let chat_box = document.getElementById("chat-box");
     chat_box.hidden = false;
+
+    //enable next button
+    let nextButton = document.getElementById("nextButton");
+    nextButton.disabled = false;
 }
 
 async function updateCounts(males, females, chatting) {
