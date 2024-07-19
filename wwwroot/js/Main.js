@@ -198,6 +198,11 @@ async function sendMessage() {
     let messageToSendInput = document.getElementById("send-message-input");
     let messageToSend = messageToSendInput.value;
 
+    //don't send empty message
+    if(messageToSend == "") {
+        return;
+    }
+
     await generateSentChatMessage(messageToSend);
     sendDataChannel.send(messageToSend);
 
@@ -430,6 +435,9 @@ async function disableUserDataInput() {
     let maleRadioButton = document.getElementById("maleRadioButton");
     maleRadioButton.disabled = true;
 
+    let femaleRadioButton = document.getElementById("femaleRadioButton");
+    femaleRadioButton.disabled = true;
+
     let countrySelection = document.getElementById("myCountrySelection");
     countrySelection.disabled = true;
 
@@ -543,7 +551,7 @@ async function generateReceivedChatMessage(message) {
 
     // Create the message container div
     const messageContainerDiv = document.createElement('div');
-    messageContainerDiv.className = 'bg-light rounded py-2 px-3 mb-2';
+    messageContainerDiv.className = 'bg-light rounded py-2 px-3 mb-2 message-container';
     mediaBodyDiv.appendChild(messageContainerDiv);
 
     // Create the message paragraph
@@ -591,7 +599,7 @@ async function generateSentChatMessage(message) {
 
     // Create the message container div
     const messageContainerDiv = document.createElement('div');
-    messageContainerDiv.className = 'bg-primary rounded py-2 px-3 mb-2';
+    messageContainerDiv.className = 'bg-primary rounded py-2 px-3 mb-2 message-container';
     mediaBodyDiv.appendChild(messageContainerDiv);
 
     // Create the message paragraph
