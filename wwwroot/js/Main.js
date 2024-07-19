@@ -198,8 +198,11 @@ async function sendMessage() {
     let messageToSendInput = document.getElementById("send-message-input");
     let messageToSend = messageToSendInput.value;
 
+    //remove unnecessary spaces
+    messageToSend = messageToSend.replace(/\s+/g,' ').trim();
+
     //don't send empty message
-    if(messageToSend == "") {
+    if(messageToSend == "" || messageToSend == " ") {
         return;
     }
 
