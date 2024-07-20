@@ -5,6 +5,10 @@
     {
       "library": "signalr.js@2.4.3",
       "destination": "wwwroot/lib/signalr.js/"
+    },
+    {
+      "library": "sweetalert2@11.12.3",
+      "destination": "wwwroot/sweetalert2/"
     }
   ]
 }

@@ -1,9 +1,4 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
-
-// Write your JavaScript code.
-
-/*
+﻿/*
 const servers = [];
 const pcConstraints = {
     'optional': [
@@ -50,13 +45,13 @@ async function setupDevice() {
     }
     catch(error) {
         if(error instanceof DOMException && error.name == "NotAllowedError") {
-            alert("You must allow video and audio in order to use the website!");
+            oopsAlert("You must allow video and audio in order to use the website!");
         }
         else if(error instanceof DOMException && error.name == "NotFoundError") {
-            alert("Video and audio to use for website were not found!");
+            oopsAlert("Video and audio to use for website were not found!");
         }
         else {
-            alert(`Error with getting user media: ${error}`);
+            oopsAlert(`Error with getting user media: ${error}`);
         }
 
         let goButton = document.getElementById("goButton");
@@ -386,7 +381,7 @@ async function getUserData() {
     let name = nameInput.value;
 
     if(name == "") {
-        alert("You need to enter a name!");
+        oopsAlert("You need to enter a name!");
         return null;
     }
 
@@ -400,7 +395,7 @@ async function getUserData() {
     let age = parseInt(ageInput.value);
 
     if(isNaN(age) || (age < 18 || age > 120)) {
-        alert("Age must be bewteen 18 and 120!");
+        oopsAlert("Age must be between 18 and 120!");
         return null;
     }
 
@@ -414,7 +409,7 @@ async function getUserData() {
     let females = femalesCheckbox.checked ? "true" : "false";
 
     if(males == "false" && females == "false") {
-        alert("You must choose male or female or both!");
+        oopsAlert("You must choose male or female or both!");
         return null;
     }
 
@@ -643,5 +638,33 @@ async function setMessageSendingState(disable) {
     sendMessageButton.disabled = disable;
 }
 
-start();
+async function oopsAlert(message) {
+    Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: message,
+    });
+}
 
+async function escapeHTML(str) {
+    return str.replace(/[&<>"'\/]/g, (char) => { 
+    switch (char) {
+      case '&':
+        return '&amp;';
+      case '<':
+        return '&lt;';
+      case '>':
+        return '&gt;';
+      case '"':
+        return '&quot;';
+      case '\'':
+        return '&#39;';
+      case '/':
+        return '&#x2F;';
+      default:
+        return char;
+    }
+    });
+}
+
+start();

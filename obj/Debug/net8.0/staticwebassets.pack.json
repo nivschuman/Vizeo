@@ -241,6 +241,42 @@
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.map"
     },
     {
+      "Id": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\lib\\signalr.js\\jquery.signalR.js",
+      "PackagePath": "staticwebassets\\lib\\signalr.js\\jquery.signalR.js"
+    },
+    {
+      "Id": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\lib\\signalr.js\\jquery.signalR.min.js",
+      "PackagePath": "staticwebassets\\lib\\signalr.js\\jquery.signalR.min.js"
+    },
+    {
+      "Id": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\lib\\sweetalert2\\sweetalert2.all.js",
+      "PackagePath": "staticwebassets\\lib\\sweetalert2\\sweetalert2.all.js"
+    },
+    {
+      "Id": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\lib\\sweetalert2\\sweetalert2.all.min.js",
+      "PackagePath": "staticwebassets\\lib\\sweetalert2\\sweetalert2.all.min.js"
+    },
+    {
+      "Id": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\lib\\sweetalert2\\sweetalert2.css",
+      "PackagePath": "staticwebassets\\lib\\sweetalert2\\sweetalert2.css"
+    },
+    {
+      "Id": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\lib\\sweetalert2\\sweetalert2.d.ts",
+      "PackagePath": "staticwebassets\\lib\\sweetalert2\\sweetalert2.d.ts"
+    },
+    {
+      "Id": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\lib\\sweetalert2\\sweetalert2.js",
+      "PackagePath": "staticwebassets\\lib\\sweetalert2\\sweetalert2.js"
+    },
+    {
+      "Id": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\lib\\sweetalert2\\sweetalert2.min.css",
+      "PackagePath": "staticwebassets\\lib\\sweetalert2\\sweetalert2.min.css"
+    },
+    {
+      "Id": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\lib\\sweetalert2\\sweetalert2.min.js",
+      "PackagePath": "staticwebassets\\lib\\sweetalert2\\sweetalert2.min.js"
+    },
+    {
       "Id": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\media\\BG.png",
       "PackagePath": "staticwebassets\\media\\BG.png"
     },
@@ -255,6 +291,10 @@
     {
       "Id": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\media\\Profile.png",
       "PackagePath": "staticwebassets\\media\\Profile.png"
+    },
+    {
+      "Id": "C:\\Users\\nivsc\\source\\repos\\VideoProject\\VideoProject\\wwwroot\\media\\TitleIcon.png",
+      "PackagePath": "staticwebassets\\media\\TitleIcon.png"
     },
     {
       "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.VideoProject.Microsoft.AspNetCore.StaticWebAssets.props",
