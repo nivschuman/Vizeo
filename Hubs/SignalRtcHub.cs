@@ -23,6 +23,7 @@ namespace VideoProject.Hubs
         {
             UserData user = JsonSerializer.Deserialize<UserData>(userData);
 
+            //initialize user model
             UserModel userModel = new UserModel();
             userModel.ConnectionId = Context.ConnectionId;
             userModel.Name = user.Name;
@@ -33,6 +34,23 @@ namespace VideoProject.Hubs
             userModel.Status = 0;
             userModel.PeerId = null;
 
+            //initialize user history model
+            UserHistoryModel userHistoryModel = new UserHistoryModel();
+            userHistoryModel.Name = user.Name;
+            userHistoryModel.Country = user.Country;
+            userHistoryModel.Age = user.Age;
+            userHistoryModel.Gender = user.Gender;
+            userHistoryModel.InterestedIn = user.InterestedIn;
+            userHistoryModel.JoinDateTimeUtc = DateTime.UtcNow;
+
+            //add user history model to database
+            await dbContext.usersHistory.AddAsync(userHistoryModel);
+            await dbContext.SaveChangesAsync();
+
+            //connect user model to user history model
+            userModel.UserHistoryId = userHistoryModel.Id;
+
+            //add user model to database
             await dbContext.users.AddAsync(userModel);
             await dbContext.SaveChangesAsync();
 
@@ -197,6 +215,14 @@ namespace VideoProject.Hubs
             if(user.PeerId != null)
             {
                 await DisconnectFromPeer(false);
+            }
+
+            //save user leave time in user history
+            UserHistoryModel? userHistoryModel = await dbContext.usersHistory.FindAsync(user.UserHistoryId);
+
+            if(userHistoryModel != null)
+            {
+                userHistoryModel.LeaveDateTimeUtc = DateTime.UtcNow;
             }
 
             //remove all userConnections tied to user

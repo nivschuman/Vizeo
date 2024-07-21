@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection.Metadata.Ecma335;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,7 @@ namespace VideoProject.Models
         public string InterestedIn { get; set; }
         public int Status { get; set; }
         public string? PeerId { get; set; }
+        public int UserHistoryId { get; set; }
 
         //return if this user is interested in other user
         public bool IsInterestedIn(UserModel other)
