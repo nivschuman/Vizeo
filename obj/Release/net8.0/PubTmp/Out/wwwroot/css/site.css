@@ -21,8 +21,9 @@ body {
 }
   
 .count-item {
-  color: lightblue;
   margin-right: 10px;
+  text-align: center;
+  padding: 0px;
 }
 
 .left-column, .middle-column, .chat-column {
