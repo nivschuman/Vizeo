@@ -162,7 +162,21 @@ namespace VideoProject.Hubs
         {
             UserModel? user = await dbContext.users.FindAsync(Context.ConnectionId);
 
-            if(user == null || user.PeerId == null)
+            if(user == null)
+            {
+                return;
+            }
+
+            //fixes race condition in which user got disconnected but still has peerConnection object
+            if(!findNewMate && user.PeerId == null)
+            {
+                user.Status = 2;
+                await dbContext.SaveChangesAsync();
+
+                return;
+            }
+
+            if(user.PeerId == null)
             {
                 return;
             }

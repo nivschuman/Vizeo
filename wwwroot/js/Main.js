@@ -331,10 +331,12 @@ async function go() {
 
 async function stop() {
     if(peerConnection) {
+        console.log("stopped with peerConnection");
         await disconnectPeer();
         hubConnection.invoke("DisconnectFromPeer", false); //also places user in stop status
     }
     else {
+        console.log("stopped without peer connection");
         hubConnection.invoke("StopSearching"); //places user in stop status
     }
 
