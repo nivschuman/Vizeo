@@ -1,0 +1,12 @@
+{
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "VizeeYo",
+    "url": "https://VizeeYo.com",
+    "potentialAction": {
+      "@type": "CommunicateAction",
+      "target": "https://VizeeYo.com",
+      "actionStatus": "PotentialActionStatus",
+      "description": "Start chatting with people instantly on VizeeYo!"
+    }
+}
